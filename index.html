@@ -1,9 +1,12 @@
+Vou criar o sistema completo com a tela da TV exatamente igual à imagem anexa (estilo Tournament Director) e o painel gerencial separado.
+
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Poker de Quinta - Tournament Manager</title>
+    <title>Poker de Quinta - Tournament Director</title>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@300;400;700;900&display=swap');
@@ -16,17 +19,17 @@
         
         body {
             font-family: 'Roboto', sans-serif;
-            background: #0a0f0a;
-            color: #fff;
+            background: #0a0a0a;
             min-height: 100vh;
         }
         
-        /* TELA DA TV (PROJEÇÃO) */
+        /* ==================== TELA DA TV (ESTILO TOURNAMENT DIRECTOR) ==================== */
         .tv-screen {
             min-height: 100vh;
-            background: linear-gradient(135deg, #0a1f0a 0%, #051005 100%);
+            background: linear-gradient(135deg, #0a1a0a 0%, #051005 100%);
             padding: 20px;
             display: none;
+            position: relative;
         }
         
         .tv-screen.active {
@@ -38,165 +41,288 @@
             margin: 0 auto;
         }
         
-        .tv-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .tv-logo h1 {
-            font-family: 'Anton';
-            font-size: 2.5em;
-            color: #d4a121;
-            letter-spacing: 4px;
-        }
-        
-        .tv-blinds {
-            text-align: center;
-        }
-        
-        .tv-blinds .blinds-value {
-            font-family: 'Anton';
-            font-size: 2em;
-            color: #FFD700;
-        }
-        
-        .tv-blinds .ante-value {
-            font-size: 1.2em;
-            color: #d4a121;
-        }
-        
-        .tv-prize {
-            text-align: right;
-        }
-        
-        .tv-prize .prize-title {
-            font-size: 0.8em;
-            opacity: 0.7;
-        }
-        
-        .tv-prize .prize-value {
-            font-family: 'Anton';
-            font-size: 1.8em;
-            color: #FFD700;
-        }
-        
-        /* Cards de Informação TV */
-        .tv-stats {
+        /* Layout principal da TV */
+        .tv-main-layout {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
         }
         
-        .tv-stat-card {
-            background: rgba(0,0,0,0.6);
-            border: 2px solid #d4a121;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .tv-stat-card h3 {
-            font-size: 0.9em;
-            opacity: 0.7;
-            margin-bottom: 10px;
-        }
-        
-        .tv-stat-card .stat-value {
-            font-family: 'Anton';
-            font-size: 2.5em;
-            color: #d4a121;
-        }
-        
-        /* Mesas na TV */
-        .tv-mesas {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-        
-        .tv-mesa {
+        /* Área esquerda - Informações principais */
+        .tv-left {
             background: rgba(0,0,0,0.4);
             border-radius: 20px;
             padding: 20px;
         }
         
-        .tv-mesa.preta { border: 3px solid #888; }
-        .tv-mesa.amarela { border: 3px solid #FFD700; }
-        
-        .tv-mesa-header {
+        /* Header da TV */
+        .tv-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 30px;
             padding-bottom: 15px;
             border-bottom: 2px solid #d4a121;
-            margin-bottom: 15px;
         }
         
-        .tv-mesa-header h2 {
+        .tv-header h1 {
             font-family: 'Anton';
-            font-size: 1.8em;
+            font-size: 2em;
+            color: #d4a121;
+            letter-spacing: 3px;
         }
         
-        .tv-mesa-header .mesa-stats {
-            font-size: 0.9em;
+        .tv-stats-row {
+            display: flex;
+            gap: 30px;
         }
         
-        .tv-jogadores-grid {
+        .tv-stat-item {
+            text-align: center;
+        }
+        
+        .tv-stat-label {
+            font-size: 0.7em;
+            opacity: 0.7;
+            text-transform: uppercase;
+        }
+        
+        .tv-stat-value {
+            font-family: 'Anton';
+            font-size: 1.5em;
+            color: #FFD700;
+        }
+        
+        /* Cards principais */
+        .tv-cards {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
         }
         
-        .tv-jogador-card {
-            background: rgba(255,255,255,0.05);
+        .tv-card {
+            background: rgba(0,0,0,0.6);
+            border: 2px solid #d4a121;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .tv-card-title {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            opacity: 0.7;
+            letter-spacing: 2px;
+        }
+        
+        .tv-card-value {
+            font-family: 'Anton';
+            font-size: 2.5em;
+            color: #FFD700;
+            margin-top: 10px;
+        }
+        
+        .tv-card-sub {
+            font-size: 0.7em;
+            opacity: 0.6;
+            margin-top: 5px;
+        }
+        
+        /* Blinds e Ante */
+        .tv-blinds-section {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .tv-blind-box {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .tv-blind-label {
+            font-size: 0.7em;
+            opacity: 0.6;
+            text-transform: uppercase;
+        }
+        
+        .tv-blind-value {
+            font-family: 'Anton';
+            font-size: 2em;
+            color: #FFD700;
+        }
+        
+        .tv-ante-value {
+            font-family: 'Anton';
+            font-size: 1.5em;
+            color: #ffaa00;
+        }
+        
+        /* Próximo Blind */
+        .tv-next-blind {
+            text-align: center;
+            background: rgba(212,161,33,0.2);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        
+        .tv-next-blind-label {
+            font-size: 0.7em;
+            opacity: 0.6;
+        }
+        
+        .tv-next-blind-value {
+            font-family: 'Anton';
+            font-size: 1.2em;
+            color: #d4a121;
+        }
+        
+        /* Tabela de Premiação */
+        .tv-prizes {
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .tv-prizes h3 {
+            font-family: 'Anton';
+            color: #d4a121;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .tv-prizes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .tv-prize-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            border-bottom: 1px solid rgba(212,161,33,0.3);
+        }
+        
+        .tv-prize-place {
+            font-weight: bold;
+        }
+        
+        .tv-prize-amount {
+            color: #FFD700;
+            font-weight: bold;
+        }
+        
+        /* Rebuys e Addons */
+        .tv-rebuy-section {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .tv-rebuy-card {
+            flex: 1;
+            background: rgba(0,0,0,0.5);
             border-radius: 10px;
             padding: 10px;
             text-align: center;
         }
         
-        .tv-jogador-posicao {
-            font-size: 0.7em;
+        .tv-rebuy-card h4 {
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
+        
+        .tv-rebuy-card .value {
+            font-family: 'Anton';
+            font-size: 1.8em;
+        }
+        
+        .tv-rebuy-card.rebuy .value { color: #FF6600; }
+        .tv-rebuy-card.addon .value { color: #4CAF50; }
+        
+        /* Mesa de Jogadores */
+        .tv-players-section {
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .tv-players-section h3 {
+            font-family: 'Anton';
+            color: #d4a121;
+            margin-bottom: 15px;
+        }
+        
+        .tv-players-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .tv-player-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .tv-player-pos {
+            font-size: 0.6em;
             color: #d4a121;
         }
         
-        .tv-jogador-nome {
+        .tv-player-name {
             font-weight: bold;
-            font-size: 0.9em;
-            margin: 5px 0;
+            font-size: 0.8em;
+            margin: 3px 0;
         }
         
-        .tv-jogador-fichas {
-            font-size: 0.8em;
+        .tv-player-chips {
+            font-size: 0.7em;
             color: #FFD700;
         }
         
-        .tv-jogador-badges {
+        .tv-player-badges {
             display: flex;
             justify-content: center;
-            gap: 5px;
-            margin-top: 5px;
+            gap: 3px;
+            margin-top: 3px;
         }
         
         .tv-badge {
-            font-size: 0.7em;
-            padding: 2px 6px;
-            border-radius: 10px;
+            font-size: 0.6em;
+            padding: 1px 4px;
+            border-radius: 8px;
         }
         
         .tv-badge.rebuy { background: #FF6600; }
         .tv-badge.addon { background: #4CAF50; }
         
-        /* Cronômetro TV */
-        .tv-cronometro {
+        /* Painel Direito da TV */
+        .tv-right {
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 20px;
             text-align: center;
-            margin-top: 20px;
+        }
+        
+        .tv-cronometro {
+            margin-bottom: 30px;
+        }
+        
+        .tv-cronometro-label {
+            font-size: 0.7em;
+            opacity: 0.7;
+            text-transform: uppercase;
         }
         
         .tv-cronometro-display {
@@ -204,13 +330,54 @@
             font-size: 4em;
             color: #FFD700;
             background: rgba(0,0,0,0.5);
-            display: inline-block;
-            padding: 20px 50px;
-            border-radius: 20px;
-            border: 2px solid #d4a121;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px 0;
         }
         
-        /* PAINEL ADMIN */
+        .tv-intervalo {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(212,161,33,0.1);
+            border-radius: 10px;
+        }
+        
+        .tv-intervalo .label {
+            font-size: 0.7em;
+        }
+        
+        .tv-intervalo .value {
+            font-family: 'Anton';
+            font-size: 2em;
+            color: #FF6600;
+        }
+        
+        .tv-champion {
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(212,161,33,0.2);
+            border-radius: 10px;
+        }
+        
+        .tv-champion h4 {
+            font-size: 0.7em;
+            opacity: 0.7;
+        }
+        
+        .tv-champion .name {
+            font-family: 'Anton';
+            font-size: 1.2em;
+            color: #FFD700;
+        }
+        
+        .tv-regulamento {
+            margin-top: 20px;
+            font-size: 0.6em;
+            opacity: 0.5;
+            cursor: pointer;
+        }
+        
+        /* ==================== PAINEL ADMIN ==================== */
         .admin-panel {
             display: none;
             min-height: 100vh;
@@ -251,13 +418,8 @@
         .btn-danger { background: #c72c48; color: #fff; }
         .btn-success { background: #4CAF50; color: #fff; }
         .btn-warning { background: #FF6600; color: #fff; }
+        .btn-sm { padding: 6px 12px; font-size: 0.8em; }
         
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 0.8em;
-        }
-        
-        /* Abas */
         .tabs {
             display: flex;
             gap: 5px;
@@ -274,7 +436,6 @@
             cursor: pointer;
             font-weight: bold;
             border-radius: 8px 8px 0 0;
-            transition: all 0.3s;
         }
         
         .tab-btn.active {
@@ -291,7 +452,6 @@
             display: block;
         }
         
-        /* Formulários */
         .form-group {
             margin-bottom: 15px;
         }
@@ -318,7 +478,6 @@
             gap: 15px;
         }
         
-        /* Tabelas */
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -339,7 +498,6 @@
             border-bottom: 1px solid #2d5016;
         }
         
-        /* Configuração de Mesas */
         .mesas-config {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -365,13 +523,26 @@
             border-radius: 8px;
         }
         
-        .jogador-item .actions button {
-            margin-left: 5px;
-            padding: 4px 8px;
-            font-size: 0.7em;
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 15px;
         }
         
-        /* Modal */
+        .seat {
+            background: rgba(212, 161, 33, 0.1);
+            border: 1px solid #d4a121;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .seat.occupied { background: rgba(76, 175, 80, 0.2); border-color: #4CAF50; }
+        .seat-number { font-size: 0.7em; color: #d4a121; }
+        .seat-player { font-weight: bold; font-size: 0.8em; margin-top: 5px; }
+        
         .modal {
             display: none;
             position: fixed;
@@ -395,52 +566,6 @@
             max-width: 500px;
         }
         
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        /* Utilitários */
-        .hidden { display: none !important; }
-        .text-center { text-align: center; }
-        .mt-20 { margin-top: 20px; }
-        .mb-20 { margin-bottom: 20px; }
-        
-        /* Distribuição de mesas */
-        .seat-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .seat {
-            background: rgba(212, 161, 33, 0.1);
-            border: 1px solid #d4a121;
-            border-radius: 8px;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .seat:hover { background: rgba(212, 161, 33, 0.3); }
-        
-        .seat.occupied { background: rgba(76, 175, 80, 0.2); border-color: #4CAF50; }
-        
-        .seat-number {
-            font-size: 0.7em;
-            color: #d4a121;
-        }
-        
-        .seat-player {
-            font-weight: bold;
-            font-size: 0.8em;
-            margin-top: 5px;
-        }
-        
-        /* Switch TV/Admin */
         .view-toggle {
             position: fixed;
             bottom: 20px;
@@ -448,75 +573,128 @@
             z-index: 100;
         }
         
-        .view-toggle-btn {
-            padding: 15px 25px;
-            background: #d4a121;
-            color: #000;
-            border: none;
-            border-radius: 50px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
+        .hidden { display: none !important; }
+        .mt-20 { margin-top: 20px; }
+        .mb-20 { margin-bottom: 20px; }
+        .text-center { text-align: center; }
     </style>
 </head>
 <body>
 
-<!-- TELA DA TV (PROJEÇÃO) -->
+<!-- TELA DA TV - ESTILO TOURNAMENT DIRECTOR -->
 <div class="tv-screen active" id="tvScreen">
     <div class="tv-container">
-        <div class="tv-header">
-            <div class="tv-logo">
-                <h1>♠️ POKER DE QUINTA ♦️</h1>
-            </div>
-            <div class="tv-blinds">
-                <div class="blinds-value" id="tvBlinds">$100/$200</div>
-                <div class="ante-value" id="tvAnte">ANTE: $0</div>
-            </div>
-            <div class="tv-prize">
-                <div class="prize-title">POTE TOTAL</div>
-                <div class="prize-value" id="tvPrizeTotal">R$ 0</div>
-            </div>
-        </div>
-        
-        <div class="tv-stats">
-            <div class="tv-stat-card">
-                <h3>JOGADORES</h3>
-                <div class="stat-value" id="tvTotalJogadores">0</div>
-            </div>
-            <div class="tv-stat-card">
-                <h3>MÉDIA FICHAS</h3>
-                <div class="stat-value" id="tvMediaFichas">0</div>
-            </div>
-            <div class="tv-stat-card">
-                <h3>REBUYS</h3>
-                <div class="stat-value" id="tvTotalRebuys">0</div>
-            </div>
-            <div class="tv-stat-card">
-                <h3>ADD-ONS</h3>
-                <div class="stat-value" id="tvTotalAddons">0</div>
-            </div>
-        </div>
-        
-        <div class="tv-mesas">
-            <div class="tv-mesa preta">
-                <div class="tv-mesa-header">
-                    <h2>♠️ MESA PRETA</h2>
-                    <div class="mesa-stats" id="tvMesaPretaStats">0 jogadores</div>
+        <div class="tv-main-layout">
+            <!-- Lado Esquerdo -->
+            <div class="tv-left">
+                <div class="tv-header">
+                    <h1>♠️ POKER DE QUINTA ♦️</h1>
+                    <div class="tv-stats-row">
+                        <div class="tv-stat-item">
+                            <div class="tv-stat-label">JOGADORES</div>
+                            <div class="tv-stat-value" id="tvTotalJogadores">0</div>
+                        </div>
+                        <div class="tv-stat-item">
+                            <div class="tv-stat-label">NÍVEL</div>
+                            <div class="tv-stat-value" id="tvNivel">1</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="tv-jogadores-grid" id="tvMesaPretaGrid"></div>
-            </div>
-            <div class="tv-mesa amarela">
-                <div class="tv-mesa-header">
-                    <h2>♦️ MESA AMARELA</h2>
-                    <div class="mesa-stats" id="tvMesaAmarelaStats">0 jogadores</div>
+                
+                <div class="tv-cards">
+                    <div class="tv-card">
+                        <div class="tv-card-title">PREMIACAO</div>
+                        <div class="tv-card-value" id="tvPremiacao">R$0</div>
+                    </div>
+                    <div class="tv-card">
+                        <div class="tv-card-title">REI DA MESA</div>
+                        <div class="tv-card-value" id="tvReiMesa">---</div>
+                    </div>
+                    <div class="tv-card">
+                        <div class="tv-card-title">MÃO DA ETAPA</div>
+                        <div class="tv-card-value" id="tvMaoEtapa">0</div>
+                        <div class="tv-card-sub">OFF</div>
+                    </div>
                 </div>
-                <div class="tv-jogadores-grid" id="tvMesaAmarelaGrid"></div>
+                
+                <div class="tv-blinds-section">
+                    <div class="tv-blind-box">
+                        <div class="tv-blind-label">BLINDS</div>
+                        <div class="tv-blind-value" id="tvBlinds">$100/$200</div>
+                    </div>
+                    <div class="tv-blind-box">
+                        <div class="tv-blind-label">BIG ANTE</div>
+                        <div class="tv-ante-value" id="tvAnte">$0</div>
+                    </div>
+                    <div class="tv-blind-box">
+                        <div class="tv-blind-label">PRÓXIMO BLIND</div>
+                        <div class="tv-next-blind-value" id="tvProximoBlind">$200/$400</div>
+                    </div>
+                </div>
+                
+                <div class="tv-prizes">
+                    <h3>🏆 PREMIAÇÃO 🏆</h3>
+                    <div class="tv-prizes-list" id="tvPrizesList">
+                        <div class="tv-prize-item"><span>1° LUGAR</span><span class="tv-prize-amount">R$0</span></div>
+                        <div class="tv-prize-item"><span>2° LUGAR</span><span class="tv-prize-amount">R$0</span></div>
+                        <div class="tv-prize-item"><span>3° LUGAR</span><span class="tv-prize-amount">R$0</span></div>
+                        <div class="tv-prize-item"><span>4° LUGAR</span><span class="tv-prize-amount">R$0</span></div>
+                        <div class="tv-prize-item"><span>5° LUGAR</span><span class="tv-prize-amount">R$0</span></div>
+                    </div>
+                </div>
+                
+                <div class="tv-rebuy-section">
+                    <div class="tv-rebuy-card rebuy">
+                        <h4>RE-BUYS</h4>
+                        <div class="value" id="tvTotalRebuys">0</div>
+                    </div>
+                    <div class="tv-rebuy-card addon">
+                        <h4>ADD-ON</h4>
+                        <div class="value" id="tvTotalAddons">0</div>
+                    </div>
+                </div>
+                
+                <div class="tv-players-section">
+                    <h3>📋 JOGADORES POR MESA</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4 style="color: #888;">♠️ MESA PRETA</h4>
+                            <div class="tv-players-grid" id="tvMesaPreta"></div>
+                        </div>
+                        <div>
+                            <h4 style="color: #FFD700;">♦️ MESA AMARELA</h4>
+                            <div class="tv-players-grid" id="tvMesaAmarela"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <div class="tv-cronometro">
-            <div class="tv-cronometro-display" id="tvCronometro">00:00</div>
+            
+            <!-- Lado Direito -->
+            <div class="tv-right">
+                <div class="tv-cronometro">
+                    <div class="tv-cronometro-label">INTERVALO EM</div>
+                    <div class="tv-cronometro-display" id="tvCronometro">00:00</div>
+                </div>
+                
+                <div class="tv-intervalo">
+                    <div class="label">PRÓXIMO NÍVEL</div>
+                    <div class="value" id="tvProximoNivel">--:--</div>
+                </div>
+                
+                <div class="tv-champion">
+                    <h4>🏆 CAMPEÃO ÚLTIMA ETAPA</h4>
+                    <div class="name" id="tvUltimoCampeao">GASPAR</div>
+                </div>
+                
+                <div class="tv-champion">
+                    <h4>⭐ MIO DA ETAPA</h4>
+                    <div class="name" id="tvMioEtapa">---</div>
+                </div>
+                
+                <div class="tv-regulamento" id="btnRegulamento">
+                    📜 LEIA O REGULAMENTO
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -525,7 +703,7 @@
 <div class="admin-panel" id="adminPanel">
     <div class="admin-container">
         <div class="admin-header">
-            <h1>🔐 PAINEL DE CONTROLE</h1>
+            <h1>🔐 PAINEL DE CONTROLE - ORGANIZAÇÃO</h1>
             <button class="btn btn-primary" id="btnToggleView">📺 IR PARA TV</button>
         </div>
         
@@ -542,15 +720,15 @@
         <div class="tab-content active" id="tab-jogadores">
             <div class="form-row">
                 <div class="form-group">
-                    <label>Valor do Buy-in (R$)</label>
+                    <label>Buy-in (R$)</label>
                     <input type="number" id="configBuyin" value="100">
                 </div>
                 <div class="form-group">
-                    <label>Valor do Rebuy (R$)</label>
+                    <label>Rebuy (R$)</label>
                     <input type="number" id="configRebuy" value="50">
                 </div>
                 <div class="form-group">
-                    <label>Valor do Add-on (R$)</label>
+                    <label>Add-on (R$)</label>
                     <input type="number" id="configAddon" value="50">
                 </div>
                 <div class="form-group">
@@ -562,20 +740,24 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Rake da Organização (%)</label>
-                    <input type="number" id="configRake" value="10" step="1">
+                    <input type="number" id="configRake" value="10">
                 </div>
                 <div class="form-group">
-                    <label>Despesas Fixas (R$)</label>
+                    <label>Despesas (R$)</label>
                     <input type="number" id="configDespesas" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Campeão última etapa</label>
+                    <input type="text" id="configCampeao" value="GASPAR">
                 </div>
             </div>
             
-            <hr class="mt-20 mb-20" style="border-color: #d4a121;">
+            <hr class="mt-20 mb-20">
             
             <div class="form-row">
                 <div class="form-group">
                     <label>Nome do Jogador</label>
-                    <input type="text" id="novoJogadorNome" placeholder="Nome do jogador">
+                    <input type="text" id="novoJogadorNome" placeholder="Nome">
                 </div>
                 <div class="form-group">
                     <label>Mesa</label>
@@ -585,7 +767,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Posição</label>
+                    <label>Posição (1-10)</label>
                     <input type="number" id="novoJogadorPosicao" placeholder="1-10">
                 </div>
                 <div style="display: flex; align-items: flex-end;">
@@ -603,69 +785,40 @@
                     <div id="listaJogadoresAmarela"></div>
                 </div>
             </div>
+            
+            <button class="btn btn-primary mt-20" id="btnSalvarConfigGeral">💾 SALVAR CONFIGURAÇÕES</button>
         </div>
         
         <!-- ABA CONFIGURAÇÃO -->
         <div class="tab-content" id="tab-config">
             <div class="form-row">
-                <div class="form-group">
-                    <label>Valor do Buy-in (R$)</label>
-                    <input type="number" id="configBuyin2" value="100">
-                </div>
-                <div class="form-group">
-                    <label>Valor do Rebuy (R$)</label>
-                    <input type="number" id="configRebuy2" value="50">
-                </div>
-                <div class="form-group">
-                    <label>Valor do Add-on (R$)</label>
-                    <input type="number" id="configAddon2" value="50">
-                </div>
-                <div class="form-group">
-                    <label>Fichas Iniciais</label>
-                    <input type="number" id="configFichas2" value="10000">
-                </div>
+                <div class="form-group"><label>Buy-in (R$)</label><input type="number" id="configBuyin2"></div>
+                <div class="form-group"><label>Rebuy (R$)</label><input type="number" id="configRebuy2"></div>
+                <div class="form-group"><label>Add-on (R$)</label><input type="number" id="configAddon2"></div>
+                <div class="form-group"><label>Fichas Iniciais</label><input type="number" id="configFichas2"></div>
             </div>
             <div class="form-row">
-                <div class="form-group">
-                    <label>Rake da Organização (%)</label>
-                    <input type="number" id="configRake2" value="10">
-                </div>
-                <div class="form-group">
-                    <label>Despesas Fixas (R$)</label>
-                    <input type="number" id="configDespesas2" value="0">
-                </div>
+                <div class="form-group"><label>Rake (%)</label><input type="number" id="configRake2"></div>
+                <div class="form-group"><label>Despesas (R$)</label><input type="number" id="configDespesas2"></div>
+                <div class="form-group"><label>Campeão última etapa</label><input type="text" id="configCampeao2"></div>
             </div>
-            <button class="btn btn-primary" id="btnSalvarConfig">💾 SALVAR CONFIGURAÇÕES</button>
+            <button class="btn btn-primary" id="btnSalvarConfig">💾 SALVAR</button>
         </div>
         
         <!-- ABA BLINDS -->
         <div class="tab-content" id="tab-blinds">
             <div class="form-row">
-                <div class="form-group">
-                    <label>Small Blind (R$)</label>
-                    <input type="number" id="blindsSB" value="100">
-                </div>
-                <div class="form-group">
-                    <label>Big Blind (R$)</label>
-                    <input type="number" id="blindsBB" value="200">
-                </div>
-                <div class="form-group">
-                    <label>Ante (R$)</label>
-                    <input type="number" id="blindsAnte" value="0">
-                </div>
-                <div class="form-group">
-                    <label>Duração do Nível (min)</label>
-                    <input type="number" id="blindsDuracao" value="20">
-                </div>
+                <div class="form-group"><label>Small Blind</label><input type="number" id="blindsSB" value="100"></div>
+                <div class="form-group"><label>Big Blind</label><input type="number" id="blindsBB" value="200"></div>
+                <div class="form-group"><label>Ante</label><input type="number" id="blindsAnte" value="0"></div>
+                <div class="form-group"><label>Duração (min)</label><input type="number" id="blindsDuracao" value="20"></div>
             </div>
             <button class="btn btn-primary" id="btnSalvarBlinds">🃏 ATUALIZAR BLINDS</button>
             
             <div class="mt-20">
                 <h3>📋 ESTRUTURA DE BLINDS</h3>
-                <table class="data-table" id="tabelaBlinds">
-                    <thead>
-                        <tr><th>Nível</th><th>SB</th><th>BB</th><th>Ante</th><th>Ação</th></tr>
-                    </thead>
+                <table class="data-table">
+                    <thead><tr><th>Nível</th><th>SB</th><th>BB</th><th>Ante</th><th>Ação</th></tr></thead>
                     <tbody id="blindsTableBody"></tbody>
                 </table>
                 <button class="btn btn-secondary btn-sm mt-20" id="btnAddBlind">➕ ADICIONAR NÍVEL</button>
@@ -675,32 +828,22 @@
         <!-- ABA PRÊMIOS -->
         <div class="tab-content" id="tab-premios">
             <div class="form-row">
-                <div class="form-group">
-                    <label>Número de Premiados</label>
-                    <input type="number" id="numPremiados" value="5" min="1" max="20">
-                </div>
-                <button class="btn btn-secondary" id="btnGerarPremios">🎲 GERAR DISTRIBUIÇÃO</button>
+                <div class="form-group"><label>Nº Premiados</label><input type="number" id="numPremiados" value="5"></div>
+                <button class="btn btn-secondary" id="btnGerarPremios">🎲 GERAR</button>
             </div>
-            
-            <div class="mt-20">
-                <h3>🏆 TABELA DE PRÊMIOS</h3>
-                <table class="data-table" id="tabelaPremios">
-                    <thead>
-                        <tr><th>Posição</th><th>Prêmio (R$)</th><th>%</th><th>Ação</th></tr>
-                    </thead>
-                    <tbody id="premiosTableBody"></tbody>
-                </table>
-                <button class="btn btn-success btn-sm mt-20" id="btnSalvarPremios">💾 SALVAR PRÊMIOS</button>
-            </div>
+            <table class="data-table mt-20">
+                <thead><tr><th>Posição</th><th>Prêmio (R$)</th><th>%</th><th>Ação</th></tr></thead>
+                <tbody id="premiosTableBody"></tbody>
+            </table>
+            <button class="btn btn-primary mt-20" id="btnSalvarPremios">💾 SALVAR</button>
         </div>
         
-        <!-- ABA MESAS (DISTRIBUIÇÃO) -->
+        <!-- ABA MESAS -->
         <div class="tab-content" id="tab-mesas">
             <div style="display: flex; gap: 15px; margin-bottom: 20px;">
                 <button class="btn btn-primary" id="btnDistribuirAleatorio">🎲 DISTRIBUIR ALEATORIAMENTE</button>
-                <button class="btn btn-secondary" id="btnLimparMesas">🗑️ LIMPAR MESAS</button>
+                <button class="btn btn-danger" id="btnLimparMesas">🗑️ LIMPAR MESAS</button>
             </div>
-            
             <div class="mesas-config">
                 <div class="mesa-config-card preta">
                     <h3>♠️ MESA PRETA</h3>
@@ -711,82 +854,35 @@
                     <div class="seat-grid" id="seatGridAmarela"></div>
                 </div>
             </div>
-            
-            <div class="mt-20">
-                <h3>📋 JOGADORES DISPONÍVEIS</h3>
-                <div id="jogadoresDisponiveis" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
-            </div>
         </div>
         
         <!-- ABA FINANCEIRO -->
         <div class="tab-content" id="tab-financeiro">
-            <div class="stats-mesas" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px;">
-                <div class="tv-stat-card">
-                    <h3>ARRECADAÇÃO TOTAL</h3>
-                    <div class="stat-value" id="finArrecadacaoTotal">R$ 0</div>
-                </div>
-                <div class="tv-stat-card">
-                    <h3>RAKE (10%)</h3>
-                    <div class="stat-value" id="finRake">R$ 0</div>
-                </div>
-                <div class="tv-stat-card">
-                    <h3>POTE LÍQUIDO</h3>
-                    <div class="stat-value" id="finPoteLiquido">R$ 0</div>
-                </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px;">
+                <div class="tv-card"><div class="tv-card-title">ARRECADAÇÃO</div><div class="tv-card-value" id="finTotal">R$0</div></div>
+                <div class="tv-card"><div class="tv-card-title">RAKE</div><div class="tv-card-value" id="finRake">R$0</div></div>
+                <div class="tv-card"><div class="tv-card-title">POTE LÍQUIDO</div><div class="tv-card-value" id="finPote">R$0</div></div>
             </div>
-            
-            <h3>📊 RESUMO POR JOGADOR</h3>
-            <table class="data-table" id="financeiroTable">
-                <thead>
-                    <tr><th>Jogador</th><th>Mesa</th><th>Buy-in</th><th>Rebuys</th><th>Add-on</th><th>Total Gasto</th></tr>
-                </thead>
+            <table class="data-table">
+                <thead><tr><th>Jogador</th><th>Mesa</th><th>Buy-in</th><th>Rebuys</th><th>Add-on</th><th>Total</th></tr></thead>
                 <tbody id="financeiroTableBody"></tbody>
             </table>
-            
-            <div class="mt-20" style="display: flex; gap: 10px;">
-                <button class="btn btn-success" id="btnExportarCSV">📊 EXPORTAR CSV</button>
-                <button class="btn btn-primary" id="btnAtualizarFinanceiro">🔄 ATUALIZAR</button>
-            </div>
+            <button class="btn btn-success mt-20" id="btnExportarCSV">📊 EXPORTAR CSV</button>
         </div>
     </div>
 </div>
 
-<!-- MODAL DE REBUY/ADDON -->
-<div class="modal" id="modalAcao">
-    <div class="modal-content">
-        <h3 id="modalTitulo">Ação do Jogador</h3>
-        <p id="modalJogadorNome"></p>
-        <div class="modal-buttons">
-            <button class="btn btn-warning" id="modalRebuySimples">REBUY SIMPLES</button>
-            <button class="btn btn-danger" id="modalRebuyDuplo">REBUY DUPLO</button>
-            <button class="btn btn-success" id="modalAddon">ADD-ON</button>
-            <button class="btn btn-secondary" id="modalFechar">FECHAR</button>
-        </div>
-    </div>
+<div class="view-toggle">
+    <button class="view-toggle-btn" id="viewToggleBtn">🔧 PAINEL ADMIN</button>
 </div>
 
 <script>
     // Estado da aplicação
     let state = {
-        jogadores: {
-            preta: [],
-            amarela: []
-        },
-        config: {
-            buyin: 100,
-            rebuy: 50,
-            addon: 50,
-            fichasIniciais: 10000,
-            rake: 10,
-            despesas: 0
-        },
-        blinds: {
-            sb: 100,
-            bb: 200,
-            ante: 0,
-            duracao: 20
-        },
-        premios: [],
+        jogadores: { preta: [], amarela: [] },
+        config: { buyin: 100, rebuy: 50, addon: 50, fichas: 10000, rake: 10, despesas: 0, campeao: "GASPAR" },
+        blinds: { sb: 100, bb: 200, ante: 0, duracao: 20, nivel: 1 },
+        premios: [{ pos: 1, valor: 720, percentual: 35 }, { pos: 2, valor: 520, percentual: 25 }, { pos: 3, valor: 380, percentual: 18 }, { pos: 4, valor: 240, percentual: 12 }, { pos: 5, valor: 140, percentual: 10 }],
         estruturaBlinds: [
             { nivel: 1, sb: 100, bb: 200, ante: 0 },
             { nivel: 2, sb: 200, bb: 400, ante: 0 },
@@ -794,14 +890,10 @@
             { nivel: 4, sb: 400, bb: 800, ante: 100 },
             { nivel: 5, sb: 600, bb: 1200, ante: 150 }
         ],
-        cronometroAtivo: false,
-        cronometroTempo: 1200, // 20 minutos em segundos
-        cronometroInterval: null
+        cronometroTempo: 1200,
+        maoEtapa: 72
     };
     
-    let modalCallback = null;
-    
-    // Inicialização
     function init() {
         carregarStorage();
         atualizarTV();
@@ -810,9 +902,8 @@
         atualizarFinanceiro();
         atualizarTabelaBlinds();
         atualizarTabelaPremios();
-        iniciarCronometroDisplay();
+        iniciarCronometro();
         
-        // Eventos das abas
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -822,22 +913,20 @@
             });
         });
         
+        document.getElementById('viewToggleBtn').addEventListener('click', toggleView);
         document.getElementById('btnToggleView').addEventListener('click', toggleView);
         document.getElementById('btnAdicionarJogador').addEventListener('click', adicionarJogador);
         document.getElementById('btnSalvarConfig').addEventListener('click', salvarConfig);
+        document.getElementById('btnSalvarConfigGeral').addEventListener('click', salvarConfig);
         document.getElementById('btnSalvarBlinds').addEventListener('click', salvarBlinds);
         document.getElementById('btnSalvarPremios').addEventListener('click', salvarPremios);
         document.getElementById('btnDistribuirAleatorio').addEventListener('click', distribuirAleatorio);
         document.getElementById('btnLimparMesas').addEventListener('click', limparMesas);
         document.getElementById('btnExportarCSV').addEventListener('click', exportarCSV);
-        document.getElementById('btnAtualizarFinanceiro').addEventListener('click', () => atualizarFinanceiro());
-        document.getElementById('btnGerarPremios').addEventListener('click', gerarDistribuicaoPremios);
+        document.getElementById('btnGerarPremios').addEventListener('click', gerarPremios);
         document.getElementById('btnAddBlind').addEventListener('click', adicionarNivelBlind);
         
-        // Modal
-        document.getElementById('modalFechar').addEventListener('click', () => {
-            document.getElementById('modalAcao').classList.remove('active');
-        });
+        carregarConfigInputs();
     }
     
     function carregarStorage() {
@@ -847,7 +936,7 @@
             state.jogadores = data.jogadores || { preta: [], amarela: [] };
             state.config = data.config || state.config;
             state.blinds = data.blinds || state.blinds;
-            state.premios = data.premios || [];
+            state.premios = data.premios || state.premios;
             state.estruturaBlinds = data.estruturaBlinds || state.estruturaBlinds;
         }
     }
@@ -862,18 +951,39 @@
         }));
     }
     
+    function carregarConfigInputs() {
+        document.getElementById('configBuyin').value = state.config.buyin;
+        document.getElementById('configRebuy').value = state.config.rebuy;
+        document.getElementById('configAddon').value = state.config.addon;
+        document.getElementById('configFichas').value = state.config.fichas;
+        document.getElementById('configRake').value = state.config.rake;
+        document.getElementById('configDespesas').value = state.config.despesas;
+        document.getElementById('configCampeao').value = state.config.campeao;
+        document.getElementById('configBuyin2').value = state.config.buyin;
+        document.getElementById('configRebuy2').value = state.config.rebuy;
+        document.getElementById('configAddon2').value = state.config.addon;
+        document.getElementById('configFichas2').value = state.config.fichas;
+        document.getElementById('configRake2').value = state.config.rake;
+        document.getElementById('configDespesas2').value = state.config.despesas;
+        document.getElementById('configCampeao2').value = state.config.campeao;
+        document.getElementById('blindsSB').value = state.blinds.sb;
+        document.getElementById('blindsBB').value = state.blinds.bb;
+        document.getElementById('blindsAnte').value = state.blinds.ante;
+        document.getElementById('blindsDuracao').value = state.blinds.duracao;
+    }
+    
     function toggleView() {
-        const tvScreen = document.getElementById('tvScreen');
-        const adminPanel = document.getElementById('adminPanel');
-        const btn = document.getElementById('btnToggleView');
+        const tv = document.getElementById('tvScreen');
+        const admin = document.getElementById('adminPanel');
+        const btn = document.getElementById('viewToggleBtn');
         
-        if (tvScreen.classList.contains('active')) {
-            tvScreen.classList.remove('active');
-            adminPanel.classList.add('active');
+        if (tv.classList.contains('active')) {
+            tv.classList.remove('active');
+            admin.classList.add('active');
             btn.textContent = '📺 IR PARA TV';
         } else {
-            tvScreen.classList.add('active');
-            adminPanel.classList.remove('active');
+            tv.classList.add('active');
+            admin.classList.remove('active');
             btn.textContent = '🔧 PAINEL ADMIN';
             atualizarTV();
         }
@@ -884,21 +994,10 @@
         const mesa = document.getElementById('novoJogadorMesa').value;
         const posicao = parseInt(document.getElementById('novoJogadorPosicao').value);
         
-        if (!nome) {
-            alert('Digite o nome do jogador');
-            return;
-        }
+        if (!nome) { alert('Digite o nome'); return; }
         
-        const novoJogador = {
-            id: Date.now(),
-            nome: nome,
-            posicao: posicao || (state.jogadores[mesa].length + 1),
-            rebuys: 0,
-            addon: false,
-            fichas: state.config.fichasIniciais
-        };
-        
-        state.jogadores[mesa].push(novoJogador);
+        const novo = { id: Date.now(), nome, posicao: posicao || (state.jogadores[mesa].length + 1), rebuys: 0, addon: false, fichas: state.config.fichas };
+        state.jogadores[mesa].push(novo);
         salvarStorage();
         atualizarListasJogadores();
         atualizarSeats();
@@ -918,26 +1017,21 @@
         atualizarFinanceiro();
     }
     
-    function adicionarRebuy(mesa, id, quantidade = 1) {
-        const jogador = state.jogadores[mesa].find(j => j.id === id);
-        if (jogador) {
-            jogador.rebuys = (jogador.rebuys || 0) + quantidade;
-            salvarStorage();
-            atualizarListasJogadores();
-            atualizarTV();
-            atualizarFinanceiro();
-        }
+    function adicionarRebuy(mesa, id) {
+        const j = state.jogadores[mesa].find(j => j.id === id);
+        if (j) { j.rebuys = (j.rebuys || 0) + 1; salvarStorage(); atualizarTudo(); }
     }
     
     function adicionarAddon(mesa, id) {
-        const jogador = state.jogadores[mesa].find(j => j.id === id);
-        if (jogador && !jogador.addon) {
-            jogador.addon = true;
-            salvarStorage();
-            atualizarListasJogadores();
-            atualizarTV();
-            atualizarFinanceiro();
-        }
+        const j = state.jogadores[mesa].find(j => j.id === id);
+        if (j && !j.addon) { j.addon = true; salvarStorage(); atualizarTudo(); }
+    }
+    
+    function atualizarTudo() {
+        atualizarListasJogadores();
+        atualizarSeats();
+        atualizarTV();
+        atualizarFinanceiro();
     }
     
     function atualizarListasJogadores() {
@@ -946,25 +1040,15 @@
         
         containerPreta.innerHTML = state.jogadores.preta.map(j => `
             <div class="jogador-item">
-                <div><strong>${j.nome}</strong> (Pos ${j.posicao})<br>
-                <small>Rebuys: ${j.rebuys} | Addon: ${j.addon ? 'Sim' : 'Não'}</small></div>
-                <div class="actions">
-                    <button class="btn-warning btn-sm" onclick="adicionarRebuy('preta', ${j.id}, 1)">+Rebuy</button>
-                    ${!j.addon ? `<button class="btn-success btn-sm" onclick="adicionarAddon('preta', ${j.id})">+Addon</button>` : ''}
-                    <button class="btn-danger btn-sm" onclick="removerJogador('preta', ${j.id})">🗑️</button>
-                </div>
+                <div><strong>${j.nome}</strong> (Pos ${j.posicao})<br><small>Rebuys: ${j.rebuys} | Addon: ${j.addon ? 'Sim' : 'Não'}</small></div>
+                <div><button class="btn-warning btn-sm" onclick="adicionarRebuy('preta', ${j.id})">+Rebuy</button> ${!j.addon ? `<button class="btn-success btn-sm" onclick="adicionarAddon('preta', ${j.id})">+Addon</button>` : ''}<button class="btn-danger btn-sm" onclick="removerJogador('preta', ${j.id})">🗑️</button></div>
             </div>
         `).join('');
         
         containerAmarela.innerHTML = state.jogadores.amarela.map(j => `
             <div class="jogador-item">
-                <div><strong>${j.nome}</strong> (Pos ${j.posicao})<br>
-                <small>Rebuys: ${j.rebuys} | Addon: ${j.addon ? 'Sim' : 'Não'}</small></div>
-                <div class="actions">
-                    <button class="btn-warning btn-sm" onclick="adicionarRebuy('amarela', ${j.id}, 1)">+Rebuy</button>
-                    ${!j.addon ? `<button class="btn-success btn-sm" onclick="adicionarAddon('amarela', ${j.id})">+Addon</button>` : ''}
-                    <button class="btn-danger btn-sm" onclick="removerJogador('amarela', ${j.id})">🗑️</button>
-                </div>
+                <div><strong>${j.nome}</strong> (Pos ${j.posicao})<br><small>Rebuys: ${j.rebuys} | Addon: ${j.addon ? 'Sim' : 'Não'}</small></div>
+                <div><button class="btn-warning btn-sm" onclick="adicionarRebuy('amarela', ${j.id})">+Rebuy</button> ${!j.addon ? `<button class="btn-success btn-sm" onclick="adicionarAddon('amarela', ${j.id})">+Addon</button>` : ''}<button class="btn-danger btn-sm" onclick="removerJogador('amarela', ${j.id})">🗑️</button></div>
             </div>
         `).join('');
     }
@@ -972,164 +1056,108 @@
     function atualizarSeats() {
         const pretaSeats = document.getElementById('seatGridPreta');
         const amarelaSeats = document.getElementById('seatGridAmarela');
-        const disponiveisDiv = document.getElementById('jogadoresDisponiveis');
         
-        const todasMesas = [...state.jogadores.preta, ...state.jogadores.amarela];
-        const todosJogadores = todasMesas.map(j => ({ ...j, mesa: state.jogadores.preta.includes(j) ? 'preta' : 'amarela' }));
-        
-        disponiveisDiv.innerHTML = todosJogadores.map(j => `
-            <div class="seat occupied" style="cursor: move;">
-                <div class="seat-number">${j.mesa === 'preta' ? '♠️' : '♦️'}</div>
-                <div class="seat-player">${j.nome}</div>
-            </div>
-        `).join('');
-        
-        // Grid das mesas
-        const pretaPosicoes = Array(10).fill().map((_, i) => {
-            const jogador = state.jogadores.preta.find(j => j.posicao === i + 1);
-            return `<div class="seat ${jogador ? 'occupied' : ''}">
-                <div class="seat-number">${i + 1}</div>
-                <div class="seat-player">${jogador ? jogador.nome : 'Vago'}</div>
-            </div>`;
+        pretaSeats.innerHTML = Array(10).fill().map((_, i) => {
+            const j = state.jogadores.preta.find(j => j.posicao === i + 1);
+            return `<div class="seat ${j ? 'occupied' : ''}"><div class="seat-number">${i+1}</div><div class="seat-player">${j ? j.nome : 'Vago'}</div></div>`;
         }).join('');
         
-        const amarelaPosicoes = Array(10).fill().map((_, i) => {
-            const jogador = state.jogadores.amarela.find(j => j.posicao === i + 1);
-            return `<div class="seat ${jogador ? 'occupied' : ''}">
-                <div class="seat-number">${i + 1}</div>
-                <div class="seat-player">${jogador ? jogador.nome : 'Vago'}</div>
-            </div>`;
+        amarelaSeats.innerHTML = Array(10).fill().map((_, i) => {
+            const j = state.jogadores.amarela.find(j => j.posicao === i + 1);
+            return `<div class="seat ${j ? 'occupied' : ''}"><div class="seat-number">${i+1}</div><div class="seat-player">${j ? j.nome : 'Vago'}</div></div>`;
         }).join('');
-        
-        pretaSeats.innerHTML = pretaPosicoes;
-        amarelaSeats.innerHTML = amarelaPosicoes;
     }
     
     function distribuirAleatorio() {
-        const todosJogadores = [...state.jogadores.preta, ...state.jogadores.amarela];
-        const jogadoresComMesa = todosJogadores.map(j => ({ ...j, mesa: state.jogadores.preta.includes(j) ? 'preta' : 'amarela' }));
-        
-        // Embaralhar
-        for (let i = jogadoresComMesa.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [jogadoresComMesa[i], jogadoresComMesa[j]] = [jogadoresComMesa[j], jogadoresComMesa[i]];
-        }
+        const todos = [...state.jogadores.preta, ...state.jogadores.amarela];
+        for (let i = todos.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [todos[i], todos[j]] = [todos[j], todos[i]]; }
         
         state.jogadores.preta = [];
         state.jogadores.amarela = [];
         
-        jogadoresComMesa.forEach((jogador, index) => {
-            const mesa = index < 10 ? 'preta' : 'amarela';
-            const posicao = (index % 10) + 1;
-            jogador.posicao = posicao;
-            state.jogadores[mesa].push({ ...jogador, mesa: undefined });
+        todos.forEach((j, idx) => {
+            const mesa = idx < 10 ? 'preta' : 'amarela';
+            j.posicao = (idx % 10) + 1;
+            state.jogadores[mesa].push(j);
         });
         
         salvarStorage();
-        atualizarListasJogadores();
-        atualizarSeats();
-        atualizarTV();
-        atualizarFinanceiro();
+        atualizarTudo();
     }
     
     function limparMesas() {
-        if (confirm('Limpar todas as mesas? Os jogadores serão removidos.')) {
-            state.jogadores = { preta: [], amarela: [] };
-            salvarStorage();
-            atualizarListasJogadores();
-            atualizarSeats();
-            atualizarTV();
-            atualizarFinanceiro();
-        }
+        if (confirm('Limpar todas as mesas?')) { state.jogadores = { preta: [], amarela: [] }; salvarStorage(); atualizarTudo(); }
     }
     
     function calcularTotalArrecadado() {
         let total = 0;
-        const todos = [...state.jogadores.preta, ...state.jogadores.amarela];
-        
-        todos.forEach(j => {
-            total += state.config.buyin;
-            total += (j.rebuys || 0) * state.config.rebuy;
-            if (j.addon) total += state.config.addon;
+        [...state.jogadores.preta, ...state.jogadores.amarela].forEach(j => {
+            total += state.config.buyin + (j.rebuys * state.config.rebuy) + (j.addon ? state.config.addon : 0);
         });
-        
         return total;
     }
     
     function atualizarFinanceiro() {
         const total = calcularTotalArrecadado();
         const rake = total * (state.config.rake / 100);
-        const despesas = state.config.despesas;
-        const poteLiquido = total - rake - despesas;
+        const pote = total - rake - state.config.despesas;
         
-        document.getElementById('finArrecadacaoTotal').textContent = `R$ ${total}`;
-        document.getElementById('finRake').textContent = `R$ ${rake}`;
-        document.getElementById('finPoteLiquido').textContent = `R$ ${poteLiquido}`;
+        document.getElementById('finTotal').innerHTML = `R$ ${total}`;
+        document.getElementById('finRake').innerHTML = `R$ ${rake}`;
+        document.getElementById('finPote').innerHTML = `R$ ${pote}`;
         
         const todos = [...state.jogadores.preta, ...state.jogadores.amarela];
-        const tbody = document.getElementById('financeiroTableBody');
-        
-        tbody.innerHTML = todos.map(j => {
+        document.getElementById('financeiroTableBody').innerHTML = todos.map(j => {
             const totalGasto = state.config.buyin + (j.rebuys * state.config.rebuy) + (j.addon ? state.config.addon : 0);
-            return `
-                <tr>
-                    <td>${j.nome}</td>
-                    <td>${state.jogadores.preta.includes(j) ? 'Preta' : 'Amarela'}</td>
-                    <td>R$ ${state.config.buyin}</td>
-                    <td>${j.rebuys || 0} (R$ ${(j.rebuys || 0) * state.config.rebuy})</td>
-                    <td>${j.addon ? 'Sim' : 'Não'} ${j.addon ? `(R$ ${state.config.addon})` : ''}</td>
-                    <td><strong>R$ ${totalGasto}</strong></td>
-                </tr>
-            `;
+            return `<tr><td>${j.nome}</td><td>${state.jogadores.preta.includes(j) ? 'Preta' : 'Amarela'}</td><td>R$ ${state.config.buyin}</td><td>${j.rebuys || 0}</td><td>${j.addon ? 'Sim' : 'Não'}</td><td><strong>R$ ${totalGasto}</strong></td></tr>`;
         }).join('');
-        
-        document.getElementById('tvPrizeTotal').textContent = `R$ ${poteLiquido}`;
     }
     
     function atualizarTV() {
         const todos = [...state.jogadores.preta, ...state.jogadores.amarela];
         const totalRebuys = todos.reduce((s, j) => s + (j.rebuys || 0), 0);
         const totalAddons = todos.filter(j => j.addon).length;
+        const totalArrecadado = calcularTotalArrecadado();
+        const poteLiquido = totalArrecadado - (totalArrecadado * state.config.rake / 100) - state.config.despesas;
         
         document.getElementById('tvTotalJogadores').textContent = todos.length;
         document.getElementById('tvTotalRebuys').textContent = totalRebuys;
         document.getElementById('tvTotalAddons').textContent = totalAddons;
+        document.getElementById('tvPremiacao').textContent = `R$ ${poteLiquido}`;
         document.getElementById('tvBlinds').textContent = `$${state.blinds.sb}/$${state.blinds.bb}`;
-        document.getElementById('tvAnte').textContent = `ANTE: $${state.blinds.ante}`;
+        document.getElementById('tvAnte').textContent = `$${state.blinds.ante}`;
+        document.getElementById('tvNivel').textContent = state.blinds.nivel;
+        document.getElementById('tvMaoEtapa').textContent = state.maoEtapa;
+        document.getElementById('tvUltimoCampeao').textContent = state.config.campeao;
         
-        const mediaFichas = todos.length > 0 ? Math.round(todos.reduce((s, j) => s + j.fichas, 0) / todos.length) : 0;
-        document.getElementById('tvMediaFichas').textContent = mediaFichas;
+        const proximoBlind = state.estruturaBlinds[state.blinds.nivel] || { sb: state.blinds.sb * 2, bb: state.blinds.bb * 2 };
+        document.getElementById('tvProximoBlind').textContent = `$${proximoBlind.sb}/$${proximoBlind.bb}`;
         
-        // Mesas TV
-        const pretaGrid = document.getElementById('tvMesaPretaGrid');
-        const amarelaGrid = document.getElementById('tvMesaAmarelaGrid');
+        // Prêmios
+        const prizesHtml = state.premios.map(p => `<div class="tv-prize-item"><span>${p.pos}° LUGAR</span><span class="tv-prize-amount">R$ ${p.valor}</span></div>`).join('');
+        document.getElementById('tvPrizesList').innerHTML = prizesHtml;
+        
+        // Jogadores por mesa
+        const pretaGrid = document.getElementById('tvMesaPreta');
+        const amarelaGrid = document.getElementById('tvMesaAmarela');
         
         pretaGrid.innerHTML = state.jogadores.preta.sort((a,b) => a.posicao - b.posicao).map(j => `
-            <div class="tv-jogador-card">
-                <div class="tv-jogador-posicao">Pos ${j.posicao}</div>
-                <div class="tv-jogador-nome">${j.nome}</div>
-                <div class="tv-jogador-fichas">${j.fichas}</div>
-                <div class="tv-jogador-badges">
-                    ${j.rebuys > 0 ? `<span class="tv-badge rebuy">${j.rebuys}R</span>` : ''}
-                    ${j.addon ? '<span class="tv-badge addon">A</span>' : ''}
-                </div>
+            <div class="tv-player-card">
+                <div class="tv-player-pos">${j.posicao}</div>
+                <div class="tv-player-name">${j.nome}</div>
+                <div class="tv-player-chips">${j.fichas}</div>
+                <div class="tv-player-badges">${j.rebuys > 0 ? `<span class="tv-badge rebuy">${j.rebuys}R</span>` : ''}${j.addon ? '<span class="tv-badge addon">A</span>' : ''}</div>
             </div>
         `).join('');
         
         amarelaGrid.innerHTML = state.jogadores.amarela.sort((a,b) => a.posicao - b.posicao).map(j => `
-            <div class="tv-jogador-card">
-                <div class="tv-jogador-posicao">Pos ${j.posicao}</div>
-                <div class="tv-jogador-nome">${j.nome}</div>
-                <div class="tv-jogador-fichas">${j.fichas}</div>
-                <div class="tv-jogador-badges">
-                    ${j.rebuys > 0 ? `<span class="tv-badge rebuy">${j.rebuys}R</span>` : ''}
-                    ${j.addon ? '<span class="tv-badge addon">A</span>' : ''}
-                </div>
+            <div class="tv-player-card">
+                <div class="tv-player-pos">${j.posicao}</div>
+                <div class="tv-player-name">${j.nome}</div>
+                <div class="tv-player-chips">${j.fichas}</div>
+                <div class="tv-player-badges">${j.rebuys > 0 ? `<span class="tv-badge rebuy">${j.rebuys}R</span>` : ''}${j.addon ? '<span class="tv-badge addon">A</span>' : ''}</div>
             </div>
         `).join('');
-        
-        document.getElementById('tvMesaPretaStats').textContent = `${state.jogadores.preta.length} jogadores`;
-        document.getElementById('tvMesaAmarelaStats').textContent = `${state.jogadores.amarela.length} jogadores`;
         
         atualizarFinanceiro();
     }
@@ -1138,12 +1166,14 @@
         state.config.buyin = parseInt(document.getElementById('configBuyin2').value) || 100;
         state.config.rebuy = parseInt(document.getElementById('configRebuy2').value) || 50;
         state.config.addon = parseInt(document.getElementById('configAddon2').value) || 50;
-        state.config.fichasIniciais = parseInt(document.getElementById('configFichas2').value) || 10000;
+        state.config.fichas = parseInt(document.getElementById('configFichas2').value) || 10000;
         state.config.rake = parseInt(document.getElementById('configRake2').value) || 10;
         state.config.despesas = parseInt(document.getElementById('configDespesas2').value) || 0;
+        state.config.campeao = document.getElementById('configCampeao2').value || "GASPAR";
         
+        carregarConfigInputs();
         salvarStorage();
-        atualizarFinanceiro();
+        atualizarTV();
         alert('Configurações salvas!');
     }
     
@@ -1152,131 +1182,109 @@
         state.blinds.bb = parseInt(document.getElementById('blindsBB').value) || 200;
         state.blinds.ante = parseInt(document.getElementById('blindsAnte').value) || 0;
         state.blinds.duracao = parseInt(document.getElementById('blindsDuracao').value) || 20;
-        
         salvarStorage();
         atualizarTV();
         alert('Blinds atualizados!');
     }
     
+    function salvarPremios() {
+        alert('Prêmios salvos!');
+        atualizarTV();
+    }
+    
+    function gerarPremios() {
+        const num = parseInt(document.getElementById('numPremiados').value) || 5;
+        const totalPote = calcularTotalArrecadado() * (1 - state.config.rake / 100) - state.config.despesas;
+        const percentuais = [35, 25, 18, 12, 10];
+        
+        state.premios = [];
+        for (let i = 0; i < num && i < percentuais.length; i++) {
+            state.premios.push({ pos: i+1, valor: Math.round(totalPote * percentuais[i] / 100), percentual: percentuais[i] });
+        }
+        salvarStorage();
+        atualizarTabelaPremios();
+        atualizarTV();
+    }
+    
+    function atualizarTabelaPremios() {
+        const tbody = document.getElementById('premiosTableBody');
+        tbody.innerHTML = state.premios.map((p, i) => `
+            <tr><td>${p.pos}º</td><td><input type="number" class="premio-input" data-index="${i}" value="${p.valor}" style="width:100px"></td><td>${p.percentual}%</td><td><button class="btn-danger btn-sm" onclick="removerPremio(${i})">❌</button></td></tr>
+        `).join('');
+        
+        document.querySelectorAll('.premio-input').forEach(inp => {
+            inp.addEventListener('change', (e) => {
+                const idx = parseInt(e.target.dataset.index);
+                state.premios[idx].valor = parseFloat(e.target.value);
+                salvarStorage();
+                atualizarTV();
+            });
+        });
+    }
+    
+    function removerPremio(index) {
+        state.premios.splice(index, 1);
+        state.premios.forEach((p, i) => p.pos = i+1);
+        salvarStorage();
+        atualizarTabelaPremios();
+        atualizarTV();
+    }
+    
     function atualizarTabelaBlinds() {
         const tbody = document.getElementById('blindsTableBody');
         tbody.innerHTML = state.estruturaBlinds.map((b, i) => `
-            <tr>
-                <td>${b.nivel}</td>
-                <td>$${b.sb}</td>
-                <td>$${b.bb}</td>
-                <td>$${b.ante}</td>
-                <td><button class="btn-danger btn-sm" onclick="removerNivelBlind(${i})">❌</button></td>
-            </tr>
+            <tr><td>${b.nivel}</td><td>$${b.sb}</td><td>$${b.bb}</td><td>$${b.ante}</td><td><button class="btn-danger btn-sm" onclick="removerNivelBlind(${i})">❌</button></td></tr>
         `).join('');
     }
     
     function adicionarNivelBlind() {
-        const ultimo = state.estruturaBlinds[state.estruturaBlinds.length - 1];
-        const novoNivel = {
-            nivel: state.estruturaBlinds.length + 1,
-            sb: (ultimo?.sb || 100) * 2,
-            bb: (ultimo?.bb || 200) * 2,
-            ante: (ultimo?.ante || 0) + 50
-        };
-        state.estruturaBlinds.push(novoNivel);
+        const ultimo = state.estruturaBlinds[state.estruturaBlinds.length-1];
+        state.estruturaBlinds.push({ nivel: state.estruturaBlinds.length+1, sb: (ultimo?.sb || 100)*2, bb: (ultimo?.bb || 200)*2, ante: (ultimo?.ante || 0)+50 });
         salvarStorage();
         atualizarTabelaBlinds();
     }
     
     function removerNivelBlind(index) {
         state.estruturaBlinds.splice(index, 1);
-        state.estruturaBlinds.forEach((b, i) => b.nivel = i + 1);
+        state.estruturaBlinds.forEach((b, i) => b.nivel = i+1);
         salvarStorage();
         atualizarTabelaBlinds();
-    }
-    
-    function atualizarTabelaPremios() {
-        const tbody = document.getElementById('premiosTableBody');
-        tbody.innerHTML = state.premios.map((p, i) => `
-            <tr>
-                <td>${i + 1}º LUGAR</td>
-                <td><input type="number" value="${p.valor}" class="premio-input" data-index="${i}" style="width: 100px;"></td>
-                <td>${p.percentual}%</td>
-                <td><button class="btn-danger btn-sm" onclick="removerPremio(${i})">❌</button></td>
-            </tr>
-        `).join('');
-        
-        // Adicionar listeners para os inputs
-        document.querySelectorAll('.premio-input').forEach(input => {
-            input.addEventListener('change', (e) => {
-                const index = parseInt(e.target.dataset.index);
-                state.premios[index].valor = parseFloat(e.target.value);
-                salvarStorage();
-            });
-        });
-    }
-    
-    function gerarDistribuicaoPremios() {
-        const numPremiados = parseInt(document.getElementById('numPremiados').value) || 5;
-        const totalPote = calcularTotalArrecadado() * (1 - state.config.rake / 100) - state.config.despesas;
-        
-        const percentuais = [35, 25, 18, 12, 10];
-        state.premios = [];
-        
-        for (let i = 0; i < numPremiados && i < percentuais.length; i++) {
-            state.premios.push({
-                valor: Math.round(totalPote * percentuais[i] / 100),
-                percentual: percentuais[i]
-            });
-        }
-        
-        salvarStorage();
-        atualizarTabelaPremios();
-    }
-    
-    function salvarPremios() {
-        atualizarTabelaPremios(); // Os valores já são salvos via input
-        alert('Prêmios salvos!');
-    }
-    
-    function removerPremio(index) {
-        state.premios.splice(index, 1);
-        salvarStorage();
-        atualizarTabelaPremios();
     }
     
     function exportarCSV() {
         const todos = [...state.jogadores.preta, ...state.jogadores.amarela];
         let csv = 'Nome,Mesa,Posição,Buy-in,Rebuys,Addon,Total Gasto\n';
-        
         todos.forEach(j => {
             const mesa = state.jogadores.preta.includes(j) ? 'Preta' : 'Amarela';
-            const totalGasto = state.config.buyin + (j.rebuys * state.config.rebuy) + (j.addon ? state.config.addon : 0);
-            csv += `"${j.nome}",${mesa},${j.posicao},${state.config.buyin},${j.rebuys || 0},${j.addon ? 'Sim' : 'Não'},${totalGasto}\n`;
+            const total = state.config.buyin + (j.rebuys * state.config.rebuy) + (j.addon ? state.config.addon : 0);
+            csv += `"${j.nome}",${mesa},${j.posicao},${state.config.buyin},${j.rebuys || 0},${j.addon ? 'Sim' : 'Não'},${total}\n`;
         });
-        
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([csv], { type: 'text/csv' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `poker_financeiro_${new Date().toISOString().slice(0,19)}.csv`;
+        link.download = `poker_${new Date().toISOString().slice(0,19)}.csv`;
         link.click();
     }
     
-    function iniciarCronometroDisplay() {
+    function iniciarCronometro() {
+        let tempo = state.blinds.duracao * 60;
         setInterval(() => {
-            if (state.cronometroAtivo && state.cronometroTempo > 0) {
-                state.cronometroTempo--;
-                const minutos = Math.floor(state.cronometroTempo / 60);
-                const segundos = state.cronometroTempo % 60;
-                document.getElementById('tvCronometro').textContent = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
-            }
+            if (tempo > 0) tempo--;
+            const min = Math.floor(tempo / 60);
+            const seg = tempo % 60;
+            document.getElementById('tvCronometro').textContent = `${min.toString().padStart(2,'0')}:${seg.toString().padStart(2,'0')}`;
+            document.getElementById('tvProximoNivel').textContent = `${Math.floor(tempo/60)}:${(tempo%60).toString().padStart(2,'0')}`;
         }, 1000);
     }
     
-    // Expor funções globalmente
     window.adicionarRebuy = adicionarRebuy;
     window.adicionarAddon = adicionarAddon;
     window.removerJogador = removerJogador;
-    window.removerNivelBlind = removerNivelBlind;
     window.removerPremio = removerPremio;
+    window.removerNivelBlind = removerNivelBlind;
     
     init();
 </script>
 </body>
 </html>
+```
