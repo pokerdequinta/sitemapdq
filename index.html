@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Torneio Poker - Rebuys e Add-ons</title>
+    <title>Atualizador de Rebuys e Add-ons - Poker Tournament</title>
     <style>
         * {
             margin: 0;
@@ -12,385 +12,505 @@
         }
 
         body {
-            font-family: 'Consolas', 'Courier New', monospace;
-            background: #1a1a2e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a472a 0%, #0e2a1a 100%);
+            min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
         h1 {
-            color: #ffd700;
             text-align: center;
-            margin-bottom: 20px;
+            color: #ffd700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #ccc;
+            margin-bottom: 30px;
         }
 
         .main-content {
             display: grid;
-            grid-template-columns: 400px 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
 
-        /* Painel de Jogadores */
-        .players-panel {
-            background: #16213e;
-            border-radius: 10px;
-            padding: 15px;
-            border: 1px solid #ffd700;
+        /* Painel de Importação */
+        .import-panel {
+            background: rgba(0,0,0,0.85);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #ffd700;
         }
 
         .panel-title {
+            font-size: 1.3em;
             color: #ffd700;
-            font-size: 1.2em;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ffd700;
         }
 
-        .add-player {
-            background: #00b894;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
+        .csv-input-area {
+            margin-bottom: 20px;
         }
 
-        .players-list {
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
-        .player-item {
-            background: #0f3460;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
-        }
-
-        .player-name {
-            background: transparent;
-            border: 1px solid #ffd700;
-            color: #ffd700;
-            padding: 3px 5px;
-            width: 120px;
-            margin-right: 10px;
-        }
-
-        .player-stats {
-            display: flex;
-            gap: 15px;
-            margin-top: 8px;
-            font-size: 12px;
-        }
-
-        .stat-control {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .stat-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            width: 22px;
-            height: 22px;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-
-        .stat-btn.plus {
-            background: #27ae60;
-        }
-
-        .remove-btn {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 2px 8px;
-            border-radius: 3px;
-            cursor: pointer;
-            float: right;
-        }
-
-        /* Painel de Código */
-        .code-panel {
-            background: #0d1117;
-            border-radius: 10px;
-            padding: 15px;
-            border: 1px solid #ffd700;
-        }
-
-        .config-row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .config-field {
-            flex: 1;
-        }
-
-        .config-field label {
-            display: block;
-            color: #ffd700;
-            font-size: 12px;
-            margin-bottom: 3px;
-        }
-
-        .config-field input {
+        textarea {
             width: 100%;
-            padding: 5px;
+            height: 300px;
             background: #1a1a2e;
             border: 1px solid #ffd700;
-            color: white;
-            border-radius: 3px;
+            color: #00ff00;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            border-radius: 5px;
+            resize: vertical;
+        }
+
+        .example-csv {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #ccc;
         }
 
         .btn {
             background: #ffd700;
             color: #1a1a2e;
             border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+            padding: 10px 20px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
             margin-right: 10px;
+            transition: all 0.3s;
         }
 
-        .btn-copy {
-            background: #00b894;
+        .btn:hover {
+            transform: translateY(-2px);
+            background: #ffed4a;
+        }
+
+        .btn-success {
+            background: #28a745;
             color: white;
         }
 
-        pre {
-            background: #0a0a0a;
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #000;
+        }
+
+        /* Painel de Configurações */
+        .config-panel {
+            background: rgba(0,0,0,0.85);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #ffd700;
+        }
+
+        .fee-info {
+            background: rgba(255,255,255,0.05);
             padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .fee-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .fee-field {
+            flex: 1;
+        }
+
+        .fee-field label {
+            display: block;
+            color: #ffd700;
+            font-size: 12px;
+            margin-bottom: 3px;
+        }
+
+        .fee-field input {
+            width: 100%;
+            padding: 8px;
+            background: #1a1a2e;
+            border: 1px solid #ffd700;
             border-radius: 5px;
-            overflow-x: auto;
-            font-size: 10px;
-            max-height: 600px;
+            color: white;
+        }
+
+        .players-list {
+            margin-top: 20px;
+            max-height: 300px;
             overflow-y: auto;
+        }
+
+        .player-row {
+            background: rgba(255,255,255,0.05);
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .player-name {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .player-stats {
             color: #00ff00;
         }
 
-        .actions {
-            margin-top: 15px;
+        .code-output {
+            margin-top: 20px;
+            background: #0a0a0a;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #ffd700;
+        }
+
+        pre {
+            background: #0d0d0d;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            color: #00ff00;
+            font-family: monospace;
+        }
+
+        .copy-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .status.success {
+            background: #28a745;
+            color: white;
+        }
+
+        .status.error {
+            background: #dc3545;
+            color: white;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎰 GERADOR DE CÓDIGO - REBUYS E ADD-ONS 🎰</h1>
-        
+        <h1>🎰 ATUALIZADOR DE REBUYS E ADD-ONS 🎰</h1>
+        <div class="subtitle">Importe um arquivo CSV com os dados dos jogadores e gere o código atualizado</div>
+
         <div class="main-content">
-            <div class="players-panel">
-                <div class="panel-title">
-                    JOGADORES
-                    <button class="add-player" onclick="addPlayer()">+ NOVO</button>
+            <!-- Painel de Importação CSV -->
+            <div class="import-panel">
+                <div class="panel-title">📁 IMPORTAR CSV</div>
+                
+                <div class="example-csv">
+                    <strong>📋 Formato do CSV (separado por vírgula ou ponto e vírgula):</strong><br>
+                    Nome;Rebuys;Addons<br>
+                    Eduardo;8;1<br>
+                    Felipe;3;1<br>
+                    Julinho;4;1<br>
+                    Leno;0;1<br>
+                    Long;0;1<br>
+                    Matheus;0;1<br>
+                    Ricardo;0;1<br>
+                    Roberto;0;1<br>
+                    Sergio;0;1<br>
+                    Tigre;0;1
                 </div>
-                <div id="playersList" class="players-list"></div>
+
+                <div class="csv-input-area">
+                    <textarea id="csvData" placeholder="Cole os dados do CSV aqui...&#10;&#10;Exemplo:&#10;Nome;Rebuys;Addons&#10;Eduardo;8;1&#10;Felipe;3;1&#10;Julinho;4;1"></textarea>
+                </div>
+
+                <div>
+                    <button class="btn" onclick="loadSample()">📋 CARREGAR EXEMPLO</button>
+                    <button class="btn btn-success" onclick="importCSV()">📥 IMPORTAR CSV</button>
+                    <button class="btn btn-info" onclick="clearAll()">🗑️ LIMPAR</button>
+                </div>
+
+                <div id="status" class="status"></div>
+
+                <div class="players-list" id="playersPreview">
+                    <div style="color:#888; text-align:center; padding:20px;">Nenhum dado importado</div>
+                </div>
             </div>
 
-            <div class="code-panel">
-                <div class="config-row">
-                    <div class="config-field">
-                        <label>Nome do Torneio</label>
-                        <input type="text" id="tourneyTitle" value="POKER DE QUARTA">
-                    </div>
-                    <div class="config-field">
-                        <label>Fee Buy-in (R$)</label>
-                        <input type="number" id="buyinFee" value="100">
-                    </div>
-                </div>
-                <div class="config-row">
-                    <div class="config-field">
-                        <label>Fee Rebuy (R$)</label>
-                        <input type="number" id="rebuyFee" value="20">
-                    </div>
-                    <div class="config-field">
-                        <label>Fee Add-on (R$)</label>
-                        <input type="number" id="addonFee" value="50">
-                    </div>
-                </div>
-                <div class="config-row">
-                    <div class="config-field">
-                        <label>Chips por Buy-in/Rebuy</label>
-                        <input type="number" id="chipsPerBuyin" value="15000">
-                    </div>
-                    <div class="config-field">
-                        <label>Chips por Add-on</label>
-                        <input type="number" id="chipsPerAddon" value="50000">
-                    </div>
-                </div>
+            <!-- Painel de Configuração e Código -->
+            <div class="config-panel">
+                <div class="panel-title">⚙️ CONFIGURAÇÕES</div>
                 
-                <div class="actions">
-                    <button class="btn" onclick="generateCode()">🔧 GERAR CÓDIGO</button>
-                    <button class="btn btn-copy" onclick="copyCode()">📋 COPIAR</button>
-                    <button class="btn" onclick="loadSample()">📋 CARREGAR EXEMPLO</button>
+                <div class="fee-info">
+                    <div class="fee-row">
+                        <div class="fee-field">
+                            <label>Fee Buy-in (R$)</label>
+                            <input type="number" id="buyinFee" value="30">
+                        </div>
+                        <div class="fee-field">
+                            <label>Fee Rebuy (R$)</label>
+                            <input type="number" id="rebuyFee" value="20">
+                        </div>
+                        <div class="fee-field">
+                            <label>Fee Add-on (R$)</label>
+                            <input type="number" id="addonFee" value="50">
+                        </div>
+                    </div>
+                    <div class="fee-row">
+                        <div class="fee-field">
+                            <label>Chips por Buy-in/Rebuy</label>
+                            <input type="number" id="chipsBuyin" value="15000">
+                        </div>
+                        <div class="fee-field">
+                            <label>Chips por Add-on</label>
+                            <input type="number" id="chipsAddon" value="50000">
+                        </div>
+                        <div class="fee-field">
+                            <label>Round do Add-on</label>
+                            <input type="number" id="addonRound" value="10">
+                        </div>
+                    </div>
                 </div>
 
-                <pre id="codeOutput">Clique em "GERAR CÓDIGO" para visualizar...</pre>
+                <button class="btn" onclick="generateFullCode()">🔧 GERAR CÓDIGO</button>
+                <button class="copy-btn" onclick="copyCode()">📋 COPIAR CÓDIGO</button>
+
+                <div class="code-output">
+                    <pre id="codeOutput">Importe um arquivo CSV e clique em "GERAR CÓDIGO"</pre>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        let players = [];
+        // Mapeamento dos jogadores com seus UUIDs originais
+        const PLAYER_MAP = {
+            "Gregory": "1935c2e2-84b8-434f-bbdd-c3bf290139ba",
+            "Andre": "2fc127c1-694e-424c-9e12-887ea0a5b6ae",
+            "Eduardo": "d6a2925b-e405-4532-806a-a2481de59f43",
+            "Felipe": "4bddb52c-6a7f-43b9-a4ac-6f7e560c172a",
+            "Julinho": "ebb484c0-d0c1-4ec9-8066-8f2a7dd5d394",
+            "Leno": "65e3fe0d-ffe8-48e0-a2bb-b938b1583c96",
+            "Long": "fa41f9f6-4389-4cab-a70b-0c2e576bf593",
+            "Matheus": "76ab831b-2dd9-4c6d-8e5d-3419e532454a",
+            "Ricardo": "4d80120c-201e-4d2e-bde8-b17be08a6a8c",
+            "Roberto": "8665b998-25c3-45d1-83ae-290b0f28f9a0",
+            "Rubens": "e9a7b3c1-5d4e-4f8a-9b2c-1a3b5c7d9e0f",
+            "Sergio": "38b39c66-f546-4471-ad38-5599a99cf105",
+            "Tigre": "c77d6f73-3582-4433-942d-4836cce86101"
+        };
 
-        function generateUUID() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = Math.random() * 16 | 0;
-                const v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
+        let importedPlayers = [];
+
+        function loadSample() {
+            const sample = `Nome;Rebuys;Addons
+Eduardo;8;1
+Felipe;3;1
+Julinho;4;1
+Leno;0;1
+Long;0;1
+Matheus;0;1
+Ricardo;0;1
+Roberto;0;1
+Sergio;0;1
+Tigre;0;1`;
+            document.getElementById('csvData').value = sample;
+            importCSV();
         }
 
-        function addPlayer() {
-            players.push({
-                uuid: generateUUID(),
-                nickname: `Jogador${players.length + 1}`,
-                rebuys: 0,
-                addons: 0,
-                seatIndex: players.length
-            });
-            renderPlayers();
-        }
-
-        function removePlayer(index) {
-            players.splice(index, 1);
-            renderPlayers();
-        }
-
-        function updateRebuys(index, delta) {
-            players[index].rebuys = Math.max(0, players[index].rebuys + delta);
-            renderPlayers();
-        }
-
-        function updateAddons(index, delta) {
-            players[index].addons = Math.max(0, players[index].addons + delta);
-            renderPlayers();
-        }
-
-        function updatePlayerName(index, name) {
-            players[index].nickname = name;
-            renderPlayers();
-        }
-
-        function renderPlayers() {
-            const container = document.getElementById('playersList');
-            if (players.length === 0) {
-                container.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Nenhum jogador<br>Clique em "+ NOVO"</div>';
+        function importCSV() {
+            const csvText = document.getElementById('csvData').value;
+            if (!csvText.trim()) {
+                showStatus("Por favor, cole os dados do CSV!", "error");
                 return;
             }
 
-            container.innerHTML = players.map((p, idx) => `
-                <div class="player-item">
-                    <button class="remove-btn" onclick="removePlayer(${idx})">✖</button>
-                    <input type="text" class="player-name" value="${p.nickname}" 
-                           onchange="updatePlayerName(${idx}, this.value)">
-                    <div class="player-stats">
-                        <div class="stat-control">
-                            <span>Rebuys:</span>
-                            <button class="stat-btn" onclick="updateRebuys(${idx}, -1)">-</button>
-                            <span style="min-width:25px">${p.rebuys}</span>
-                            <button class="stat-btn plus" onclick="updateRebuys(${idx}, 1)">+</button>
-                        </div>
-                        <div class="stat-control">
-                            <span>Add-ons:</span>
-                            <button class="stat-btn" onclick="updateAddons(${idx}, -1)">-</button>
-                            <span style="min-width:25px">${p.addons}</span>
-                            <button class="stat-btn plus" onclick="updateAddons(${idx}, 1)">+</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+            // Detecta separador (vírgula ou ponto e vírgula)
+            let separator = ',';
+            if (csvText.includes(';')) {
+                separator = ';';
+            }
+
+            const lines = csvText.trim().split(/\r?\n/);
+            if (lines.length < 2) {
+                showStatus("CSV deve conter pelo menos cabeçalho e uma linha de dados!", "error");
+                return;
+            }
+
+            const headers = lines[0].split(separator);
+            const nameIndex = headers.findIndex(h => h.toLowerCase().includes('nome') || h.toLowerCase().includes('name'));
+            const rebuysIndex = headers.findIndex(h => h.toLowerCase().includes('rebuy'));
+            const addonsIndex = headers.findIndex(h => h.toLowerCase().includes('addon'));
+
+            if (nameIndex === -1) {
+                showStatus("CSV deve conter uma coluna 'Nome'!", "error");
+                return;
+            }
+
+            const players = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const cols = lines[i].split(separator);
+                if (cols.length < 3) continue;
+
+                const name = cols[nameIndex].trim();
+                const rebuys = parseInt(cols[rebuysIndex !== -1 ? rebuysIndex : 1]) || 0;
+                const addons = parseInt(cols[addonsIndex !== -1 ? addonsIndex : 2]) || 0;
+
+                if (name) {
+                    players.push({ name, rebuys, addons });
+                }
+            }
+
+            if (players.length === 0) {
+                showStatus("Nenhum jogador válido encontrado no CSV!", "error");
+                return;
+            }
+
+            importedPlayers = players;
+            showStatus(`✅ ${players.length} jogadores importados com sucesso!`, "success");
+            displayPlayersPreview();
         }
 
-        function generateCode() {
-            const tourneyTitle = document.getElementById('tourneyTitle').value;
+        function displayPlayersPreview() {
+            const container = document.getElementById('playersPreview');
+            if (importedPlayers.length === 0) {
+                container.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Nenhum dado importado</div>';
+                return;
+            }
+
+            let html = '<div style="font-size:12px; color:#ffd700; margin-bottom:10px;">📊 JOGADORES IMPORTADOS:</div>';
+            importedPlayers.forEach(p => {
+                const totalChips = parseInt(document.getElementById('chipsBuyin').value) + 
+                                  (p.rebuys * parseInt(document.getElementById('chipsBuyin').value)) + 
+                                  (p.addons * parseInt(document.getElementById('chipsAddon').value));
+                html += `<div class="player-row">
+                            <span class="player-name">${p.name}</span>
+                            <span class="player-stats">🔁 ${p.rebuys} rebuys | 💰 ${p.addons} add-ons | 💎 ${totalChips.toLocaleString()} fichas</span>
+                         </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            setTimeout(() => {
+                statusDiv.className = 'status';
+                statusDiv.textContent = '';
+            }, 3000);
+        }
+
+        function generateFullCode() {
+            if (importedPlayers.length === 0) {
+                showStatus("Importe um CSV primeiro!", "error");
+                return;
+            }
+
             const buyinFee = parseInt(document.getElementById('buyinFee').value);
             const rebuyFee = parseInt(document.getElementById('rebuyFee').value);
             const addonFee = parseInt(document.getElementById('addonFee').value);
-            const chipsPerBuyin = parseInt(document.getElementById('chipsPerBuyin').value);
-            const chipsPerAddon = parseInt(document.getElementById('chipsPerAddon').value);
-            
-            const baseTime = 1777071314333;
-            const rebuyTime = 1777071445221;
-            const addonTime = 1777071506910;
-            
-            // Construir o Map dos jogadores
+            const chipsBuyin = parseInt(document.getElementById('chipsBuyin').value);
+            const chipsAddon = parseInt(document.getElementById('chipsAddon').value);
+            const addonRound = parseInt(document.getElementById('addonRound').value);
+
+            const baseTime = 1776803009249;
+            const rebuyTime = 1776803010000;
+            const addonTime = 1776803020000;
+
             let playersMapEntries = [];
-            
-            players.forEach((player, idx) => {
-                const playerUUID = player.uuid;
-                const nickname = player.nickname;
-                const seatIdx = idx;
-                
-                // Construir o array de Buyins (1 buy-in + N rebuys)
-                let buyinsArray = [];
-                
-                // Buy-in inicial
-                buyinsArray.push(`new GameBuyin({Time: ${baseTime}, Round: 1, Amount: ${buyinFee}, PersonalBounty: 0, Rake: new PerPlayerRake([0]), Chips: ${chipsPerBuyin}, Points: 0, ProfileName: "Master", Seat: new GameSeat({TableName: "MESA 1", SeatIndex: ${seatIdx}, Locked: false, TableUUID: "dfc69d93-a845-4e62-8fe2-0b058ff7e144"})})`);
-                
-                // Rebuys
-                for (let i = 0; i < player.rebuys; i++) {
-                    buyinsArray.push(`new GameBuyin({Time: ${rebuyTime}, Round: 1, Amount: ${rebuyFee}, PersonalBounty: 0, Rake: new PerPlayerRake([0]), Chips: ${chipsPerBuyin}, Points: 0, ProfileName: "Master", Seat: new GameSeat({TableName: "MESA 1", SeatIndex: ${seatIdx}, Locked: false, TableUUID: "dfc69d93-a845-4e62-8fe2-0b058ff7e144"})})`);
+
+            importedPlayers.forEach((player, idx) => {
+                const playerUUID = PLAYER_MAP[player.name];
+                if (!playerUUID) {
+                    console.warn(`Jogador não encontrado no mapa: ${player.name}`);
+                    return;
                 }
+
+                const nickname = player.name;
                 
-                // Construir o array de AddOns
+                // Construir Buyins (1 buy-in + rebuys)
+                let buyinsArray = [];
+                buyinsArray.push(`new GameBuyin({Time: ${baseTime}, Round: 1, Amount: ${buyinFee}, PersonalBounty: 0, Rake: new PerPlayerRake([0]), Chips: ${chipsBuyin}, Points: 0, ProfileName: "Master"})`);
+                
+                for (let i = 0; i < player.rebuys; i++) {
+                    buyinsArray.push(`new GameBuyin({Time: ${rebuyTime + i * 1000}, Round: 1, Amount: ${rebuyFee}, PersonalBounty: 0, Rake: new PerPlayerRake([0]), Chips: ${chipsBuyin}, Points: 0, ProfileName: "Master"})`);
+                }
+
+                // Construir AddOns
                 let addonsArray = [];
                 for (let i = 0; i < player.addons; i++) {
-                    addonsArray.push(`new GameAddOn({Time: ${addonTime}, Round: 10, Amount: ${addonFee}, Rake: new PerPlayerRake([0]), Chips: ${chipsPerAddon}, Points: 0, ProfileName: "Master"})`);
+                    addonsArray.push(`new GameAddOn({Time: ${addonTime + i * 1000}, Round: ${addonRound}, Amount: ${addonFee}, Rake: new PerPlayerRake([0]), Chips: ${chipsAddon}, Points: 0, ProfileName: "Master"})`);
                 }
-                
-                // Calcular ChipCount
-                const chipCount = chipsPerBuyin + (player.rebuys * chipsPerBuyin) + (player.addons * chipsPerAddon);
-                
-                const playerEntry = `["${playerUUID}", new GamePlayer({ UUID: "${playerUUID}", Name: new PlayerName({UUID: "${playerUUID}", Nickname: "${nickname}", Firstname: "", Lastname: "", LastModified: 1776777890363}), Info: new PlayerInfo({UUID: "${playerUUID}", StreetAddress: "", City: "", State: "", Zipcode: "", Country: "", Phone1: "", Phone2: "", Email1: "", Email2: "", Notes: "", LastModified: 1776777890383, OptID: "", ImageRot: 0}), Buyins: [${buyinsArray.join(', ')}], AddOns: [${addonsArray.join(', ')}], CashAdjustment: 0, PointsAdjustment: 0, ChipCount: ${chipCount}, NumberOfTableMoves: 1, PaidInFull: true, HitsAdjustment: 0 })]`;
+
+                const totalChips = chipsBuyin + (player.rebuys * chipsBuyin) + (player.addons * chipsAddon);
+                const lastModified = 1776802998912;
+
+                const playerEntry = `["${playerUUID}", new GamePlayer({ UUID: "${playerUUID}", Name: new PlayerName({UUID: "${playerUUID}", Nickname: "${nickname}", Firstname: "", Lastname: "", LastModified: ${lastModified}}), Info: new PlayerInfo({UUID: "${playerUUID}", StreetAddress: "", City: "", State: "", Zipcode: "", Country: "", Phone1: "", Phone2: "", Email1: "", Email2: "", Notes: "", LastModified: ${lastModified}, OptID: ""}), Buyins: [${buyinsArray.join(', ')}], AddOns: [${addonsArray.join(', ')}], CashAdjustment: 0, PointsAdjustment: 0, ChipCount: ${totalChips}, NumberOfTableMoves: 1, PaidInFull: true, HitsAdjustment: 0 })]`;
                 
                 playersMapEntries.push(playerEntry);
             });
-            
-            // Seats array para a tabela
-            const seatsArray = players.map((p, idx) => `"${p.uuid}"`).join(', ');
-            
-            const finalCode = `{ V: "3.7.2", T: new Tournament({UUID: "1806768e-837c-485a-8e96-f1a12a5286d0", Title: "${tourneyTitle}", Description: "", Notes: "", Financials: new FinancialConfig({Buyins: new BuyConfig({Allow: false, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 30, Rake: new PerPlayerRake([0]), Chips: 15000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 0, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), AddOns: new BuyConfig({Allow: true, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 50, Rake: new PerPlayerRake([0]), Chips: 50000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 10, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), Rebuys: new BuyConfig({Allow: true, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 20, Rake: new PerPlayerRake([0]), Chips: 15000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 10, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), FixedRake: new FixedRakeConfig({Type: 0, Real: new PerPlayerRake([0]), Percent: new PerPlayerRake([0]), Round: 0, RoundToNearest: 1}), HouseContribution: 0, GuaranteedPot: 0, TotalChipsAdjustment: 0, PointsForHit: 0, PointsForPlaying: new UserFormula({Text: "", Strict: false}), UseBounties: false, RestrictedBounty: true, AllowInTourneyRebuys: true, AllowRebuyOverrideAfterBustout: true}), Players: new GamePlayers({Players: Map.from([${playersMapEntries.join(', ')}]), Chops: new GameChops({Chops: []}), Config: new GamePlayersConfig({TrackPlayers: true, NumberOfEntries: 0, NumberOfPlayers: 0, NumberOfRebuys: 0, NumberOfAddOns: 0, FullCreditHit: false})}), Levels: new GameLevels({Levels: [new GameRound({Minutes: 15, SmallBlind: 100, BigBlind: 200, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [100, 200, 100, 200, 100, 200, 100, 200], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 100, BigBlind: 300, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [200, 400, 200, 400, 200, 400, 200, 400], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 200, BigBlind: 400, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [300, 600, 300, 600, 300, 600, 300, 600], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 300, BigBlind: 600, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [500, 1000, 500, 1000, 500, 1000, 500, 1000], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 400, BigBlind: 800, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [700, 1400, 700, 1400, 700, 1400, 700, 1400], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 500, BigBlind: 1000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [900, 1800, 900, 1800, 900, 1800, 900, 1800], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 600, BigBlind: 1200, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [1100, 2200, 1100, 2200, 1100, 2200, 1100, 2200], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 800, BigBlind: 1600, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [1300, 2600, 1300, 2600, 1300, 2600, 1300, 2600], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 1000, BigBlind: 2000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [1500, 3000, 1500, 3000, 1500, 3000, 1500, 3000], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 1500, BigBlind: 3000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [1500, 3000, 1500, 3000, 1500, 3000, 1500, 3000], Notes: ""}), new GameBreak({Minutes: 10, Tokens: new TokenOverrides({Tokens: Map.from([])}), ChipUp: false, Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 2000, BigBlind: 4000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [2000, 4000, 2000, 4000, 2000, 4000, 2000, 4000], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 2500, BigBlind: 5000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [2500, 5000, 2500, 5000, 2500, 5000, 2500, 5000], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 3000, BigBlind: 6000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [3000, 6000, 3000, 6000, 3000, 6000, 3000, 6000], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 3500, BigBlind: 7000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [3500, 7000, 3500, 7000, 3500, 7000, 3500, 7000], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 4000, BigBlind: 8000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [4000, 8000, 4000, 8000, 4000, 8000, 4000, 8000], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 4500, BigBlind: 9000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [4500, 9000, 4500, 9000, 4500, 9000, 4500, 9000], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 5000, BigBlind: 10000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [5000, 10000, 5000, 10000, 5000, 10000, 5000, 10000], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 7000, BigBlind: 14000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [4750, 9500, 4750, 9500, 4750, 9500, 4750, 9500], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 10000, BigBlind: 20000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [9500, 19000, 9500, 19000, 9500, 19000, 9500, 19000], Notes: ""}), new GameRound({Minutes: 10, SmallBlind: 15000, BigBlind: 30000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [19000, 38000, 19000, 38000, 19000, 38000, 19000, 38000], Notes: ""}), new GameRound({Minutes: 10, SmallBlind: 30000, BigBlind: 60000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [38000, 76000, 38000, 76000, 38000, 76000, 38000, 76000], Notes: ""}), new GameRound({Minutes: 10, SmallBlind: 60000, BigBlind: 120000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [76000, 152000, 76000, 152000, 76000, 152000, 76000, 152000], Notes: ""}), new GameRound({Minutes: 10, SmallBlind: 120000, BigBlind: 240000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [152000, 304000, 152000, 304000, 152000, 304000, 152000, 304000], Notes: ""}), new GameRound({Minutes: 10, SmallBlind: 240000, BigBlind: 480000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [304000, 608000, 304000, 608000, 304000, 608000, 304000, 608000], Notes: ""})]}), Prizes: new GamePrizes({Prizes: [new GamePrize({Description: "1 Lugar", Type: 0, Recipient: 1, AmountType: 0, Amount: 46, Adjustment: 0, ShareRemainder: true, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 830, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "2 Lugar", Type: 0, Recipient: 2, AmountType: 0, Amount: 27, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 490, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "3 Lugar", Type: 0, Recipient: 3, AmountType: 0, Amount: 17, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 310, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "4 Lugar", Type: 0, Recipient: 4, AmountType: 0, Amount: 10, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 180, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false})], RoundPrizes: 2, RoundToNearest: 10, EstimatedPotInfo: new EstimatedPotData({UseEstimatedPot: false, EstimatedPot: 0, CalculateEstimatedPot: false, NumberOfBuyins: 0, NumberOfRebuys: 0, NumberOfAddOns: 0, CalculatedPot: 0, ShowEstimatedPot: false}), Automatic: false, AutomaticAtTop: true}), Chips: new GameChips({Chips: [new GameChip({ChipID: "1", Label: "White", ImagePath: "images\\\\chip_white.gif", Value: 100, Use: true, PerPlayer: 0}), new GameChip({ChipID: "2", Label: "Red", ImagePath: "images\\\\chip_red.gif", Value: 500, Use: true, PerPlayer: 0}), new GameChip({ChipID: "3", Label: "Blue", ImagePath: "images\\\\chip_blue.gif", Value: 1000, Use: true, PerPlayer: 0}), new GameChip({ChipID: "4", Label: "Black", ImagePath: "images\\\\chip_black.gif", Value: 5000, Use: true, PerPlayer: 0})], ChipSets: [new ChipSet({Name: "Main Set", ChipCounts: Map.from([["1", 120], ["2", 180], ["3", 120], ["4", 80]])}), new ChipSet({Name: "Set 2", ChipCounts: Map.from([["1", 120], ["2", 180], ["3", 120], ["4", 80]])}), new ChipSet({Name: "Set 3", ChipCounts: Map.from([["1", 400], ["2", 100], ["3", 0], ["4", 0]])})]}), Tables: new GameTables({AutoSuggestMovements: true, MaxPlayerDisparity: 1, Tables: [new GameTable({Name: "MESA 1", NumberOfSeats: 10, Seats: [${seatsArray}], Locks: [${players.map(() => 'false').join(', ')}], DealerButtonSeat: 0, UUID: "dfc69d93-a845-4e62-8fe2-0b058ff7e144"})], BalanceAlgorithm: 0, RandomizeFinalTable: true, LastPlayerMove: new PlayerMovement({Time: 1777071316654, Moves: []}), UnavailableSeats: Map.from([]), CollapseFirstTables: [], CollapseLastTables: [], CollapseFirstInOrder: false, CollapseLastInOrder: false, SeatPlayersCloseToHome: false, CanSeatUnpaidPlayers: false, AutoAcceptMovementSuggestions: false}), History: new GameHistory({History: []}), StartTime: 1776778018114, CurrentPeriodDuration: 600, AccumulatedSeconds: 0, ClockRunning: false, Countdown: 0, CountdownSeconds: 0, CountdownTime: 0, CurrentLevel: 10, Events: new GameEvents({Sounds: [new Sound({Name: "clock", Path: "sounds\\\\clockSound.wav"}), new Sound({Name: "warning", Path: "sounds\\\\warningSound.wav"}), new Sound({Name: "final", Path: "sounds\\\\finalSound.wav"}), new Sound({Name: "handTimer", Path: "sounds\\\\handTimer.wav"})], Events: [new GameEvent({Description: "Clock is paused", Trigger: 1, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "clock"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Clock is unpaused", Trigger: 2, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "clock"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Level end warning", Trigger: 0, Conditions: new UserFormula({Text: "(secondsLeft = 60) or (secondsLeft = 3) or (secondsLeft = 2) or (secondsLeft = 1)", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "warning"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Level end", Trigger: 6, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "final"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Hand Timer expires", Trigger: 18, Conditions: new UserFormula({Text: "handTimerSecondsLeft = 0", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "handTimer"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "The Countdown ends", Trigger: 0, Conditions: new UserFormula({Text: "(state = 1) and (secondsLeft = 0)", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "final"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0})], MsgPropSets: Map.from([]), DefMsgDuration: 7}), LastModified: 0, Rules: new GameRules({Tokens: new TokenOverrides({Tokens: Map.from([])})})}), L: { V: "3.7.2", L: new LO.Layout({ScreenBox: new LO.ScreenBox({Contents: Map.from([])}), ScreenSets: new LO.ScreenSets({Sets: []}), GlobalProps: new LO.GlobalProps({Contents: Map.from([])}), CellBox: new LO.CellBox({Contents: Map.from([])}), BannerSets: new LO.BannerSets({Contents: Map.from([])}), OtherProps: new LO.OtherProps({Properties: Map.from([])}), Tokens: new TokenOverrides({Tokens: Map.from([])}), Settings: new LO.LayoutSettings({OptimalRes: new Dimension({Width: 1024, Height: 768})})}) } }`;
-            
-            document.getElementById('codeOutput').innerText = finalCode;
+
+            // Seats array
+            const seatsArray = importedPlayers.map(p => `"${PLAYER_MAP[p.name]}"`).join(', ');
+            const locksArray = importedPlayers.map(() => 'false').join(', ');
+
+            const fullCode = `{ V: "3.7.2", T: new Tournament({UUID: "1806768e-837c-485a-8e96-f1a12a5286d0", Title: "POKER DE QUARTA", Description: "", Notes: "", Financials: new FinancialConfig({Buyins: new BuyConfig({Allow: false, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 30, Rake: new PerPlayerRake([0]), Chips: 15000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 0, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), AddOns: new BuyConfig({Allow: false, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 50, Rake: new PerPlayerRake([0]), Chips: 50000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 0, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), Rebuys: new BuyConfig({Allow: true, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 20, Rake: new PerPlayerRake([0]), Chips: 15000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 10, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), FixedRake: new FixedRakeConfig({Type: 0, Real: new PerPlayerRake([180]), Percent: new PerPlayerRake([0]), Round: 0, RoundToNearest: 1}), HouseContribution: 0, GuaranteedPot: 0, TotalChipsAdjustment: 0, PointsForHit: 0, PointsForPlaying: new UserFormula({Text: "", Strict: false}), UseBounties: false, RestrictedBounty: true, AllowInTourneyRebuys: true, AllowRebuyOverrideAfterBustout: true}), Players: new GamePlayers({Players: Map.from([${playersMapEntries.join(', ')}]), Chops: new GameChops({Chops: []}), Config: new GamePlayersConfig({TrackPlayers: true, NumberOfEntries: 0, NumberOfPlayers: 0, NumberOfRebuys: 0, NumberOfAddOns: 0, FullCreditHit: false})}), Levels: new GameLevels({Levels: [new GameRound({Minutes: 15, SmallBlind: 100, BigBlind: 200, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [100, 200, 100, 200, 100, 200, 100, 200], Notes: ""})]}), Prizes: new GamePrizes({Prizes: [new GamePrize({Description: "1 Lugar", Type: 0, Recipient: 1, AmountType: 0, Amount: 46, Adjustment: 0, ShareRemainder: true, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 70, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "2 Lugar", Type: 0, Recipient: 2, AmountType: 0, Amount: 27, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 40, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "3 Lugar", Type: 0, Recipient: 3, AmountType: 0, Amount: 17, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 30, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "4 Lugar", Type: 0, Recipient: 4, AmountType: 0, Amount: 10, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 20, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false})], RoundPrizes: 2, RoundToNearest: 10, EstimatedPotInfo: new EstimatedPotData({UseEstimatedPot: false, EstimatedPot: 0, CalculateEstimatedPot: false, NumberOfBuyins: 0, NumberOfRebuys: 0, NumberOfAddOns: 0, CalculatedPot: 0, ShowEstimatedPot: false}), Automatic: false, AutomaticAtTop: true}), Chips: new GameChips({Chips: [new GameChip({ChipID: "1", Label: "White", ImagePath: "images\\\\chip_white.gif", Value: 100, Use: true, PerPlayer: 0}), new GameChip({ChipID: "2", Label: "Red", ImagePath: "images\\\\chip_red.gif", Value: 500, Use: true, PerPlayer: 0}), new GameChip({ChipID: "3", Label: "Blue", ImagePath: "images\\\\chip_blue.gif", Value: 1000, Use: true, PerPlayer: 0}), new GameChip({ChipID: "4", Label: "Black", ImagePath: "images\\\\chip_black.gif", Value: 5000, Use: true, PerPlayer: 0})], ChipSets: [new ChipSet({Name: "Main Set", ChipCounts: Map.from([["1", 120], ["2", 180], ["3", 120], ["4", 80]])}), new ChipSet({Name: "Set 2", ChipCounts: Map.from([["1", 120], ["2", 180], ["3", 120], ["4", 80]])}), new ChipSet({Name: "Set 3", ChipCounts: Map.from([["1", 400], ["2", 100], ["3", 0], ["4", 0]])})]}), Tables: new GameTables({AutoSuggestMovements: true, MaxPlayerDisparity: 1, Tables: [new GameTable({Name: "MESA 1", NumberOfSeats: ${importedPlayers.length}, Seats: [${seatsArray}], Locks: [${locksArray}], DealerButtonSeat: 0, UUID: "dfc69d93-a845-4e62-8fe2-0b058ff7e144"})], BalanceAlgorithm: 0, RandomizeFinalTable: true, LastPlayerMove: new PlayerMovement({Time: 1776803079458, Moves: []}), UnavailableSeats: Map.from([]), CollapseFirstTables: [], CollapseLastTables: [], CollapseFirstInOrder: false, CollapseLastInOrder: false, SeatPlayersCloseToHome: false, CanSeatUnpaidPlayers: false, AutoAcceptMovementSuggestions: false}), History: new GameHistory({History: []}), StartTime: 1776778018114, CurrentPeriodDuration: 900, AccumulatedSeconds: 0, ClockRunning: false, Countdown: 0, CountdownSeconds: 0, CountdownTime: 0, CurrentLevel: 0, Events: new GameEvents({Sounds: [new Sound({Name: "clock", Path: "sounds\\\\clockSound.wav"}), new Sound({Name: "warning", Path: "sounds\\\\warningSound.wav"}), new Sound({Name: "final", Path: "sounds\\\\finalSound.wav"}), new Sound({Name: "handTimer", Path: "sounds\\\\handTimer.wav"})], Events: [new GameEvent({Description: "Clock is paused", Trigger: 1, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "clock"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Clock is unpaused", Trigger: 2, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "clock"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Level end warning", Trigger: 0, Conditions: new UserFormula({Text: "(secondsLeft = 60) or (secondsLeft = 3) or (secondsLeft = 2) or (secondsLeft = 1)", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "warning"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Level end", Trigger: 6, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "final"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Hand Timer expires", Trigger: 18, Conditions: new UserFormula({Text: "handTimerSecondsLeft = 0", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "handTimer"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "The Countdown ends", Trigger: 0, Conditions: new UserFormula({Text: "(state = 1) and (secondsLeft = 0)", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "final"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0})], MsgPropSets: Map.from([]), DefMsgDuration: 7}), LastModified: 0, Rules: new GameRules({Tokens: new TokenOverrides({Tokens: Map.from([])})})}), L: { V: "3.7.2", L: new LO.Layout({ScreenBox: new LO.ScreenBox({Contents: Map.from([])}), ScreenSets: new LO.ScreenSets({Sets: []}), GlobalProps: new LO.GlobalProps({Contents: Map.from([])}), CellBox: new LO.CellBox({Contents: Map.from([])}), BannerSets: new LO.BannerSets({Contents: Map.from([])}), OtherProps: new LO.OtherProps({Properties: Map.from([])}), Tokens: new TokenOverrides({Tokens: Map.from([])}), Settings: new LO.LayoutSettings({OptimalRes: new Dimension({Width: 1024, Height: 768})})}) } }`;
+
+            document.getElementById('codeOutput').innerText = fullCode;
+            showStatus("✅ Código gerado com sucesso!", "success");
         }
 
         function copyCode() {
             const code = document.getElementById('codeOutput').innerText;
             navigator.clipboard.writeText(code);
-            alert('Código copiado!');
+            showStatus("📋 Código copiado para a área de transferência!", "success");
         }
 
-        function loadSample() {
-            players = [
-                { uuid: "d6a2925b-e405-4532-806a-a2481de59f43", nickname: "Eduardo", rebuys: 8, addons: 1, seatIndex: 0 },
-                { uuid: "4bddb52c-6a7f-43b9-a4ac-6f7e560c172a", nickname: "Felipe", rebuys: 3, addons: 1, seatIndex: 1 },
-                { uuid: "ebb484c0-d0c1-4ec9-8066-8f2a7dd5d394", nickname: "Julinho", rebuys: 4, addons: 1, seatIndex: 2 },
-                { uuid: "65e3fe0d-ffe8-48e0-a2bb-b938b1583c96", nickname: "Leno", rebuys: 0, addons: 1, seatIndex: 3 },
-                { uuid: "fa41f9f6-4389-4cab-a70b-0c2e576bf593", nickname: "Long", rebuys: 0, addons: 1, seatIndex: 4 },
-                { uuid: "76ab831b-2dd9-4c6d-8e5d-3419e532454a", nickname: "Matheus", rebuys: 0, addons: 1, seatIndex: 5 },
-                { uuid: "4d80120c-201e-4d2e-bde8-b17be08a6a8c", nickname: "Ricardo", rebuys: 0, addons: 1, seatIndex: 6 },
-                { uuid: "8665b998-25c3-45d1-83ae-290b0f28f9a0", nickname: "Roberto", rebuys: 0, addons: 1, seatIndex: 7 },
-                { uuid: "38b39c66-f546-4471-ad38-5599a99cf105", nickname: "Sergio", rebuys: 0, addons: 1, seatIndex: 8 },
-                { uuid: "c77d6f73-3582-4433-942d-4836cce86101", nickname: "Tigre", rebuys: 0, addons: 1, seatIndex: 9 }
-            ];
-            renderPlayers();
-            generateCode();
+        function clearAll() {
+            importedPlayers = [];
+            document.getElementById('csvData').value = '';
+            document.getElementById('playersPreview').innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Nenhum dado importado</div>';
+            document.getElementById('codeOutput').innerText = 'Importe um arquivo CSV e clique em "GERAR CÓDIGO"';
+            showStatus("Dados limpos!", "success");
         }
-
-        // Inicializar com exemplo
-        loadSample();
     </script>
 </body>
 </html>
