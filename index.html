@@ -1,786 +1,402 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POKER DE QUARTA — Gerenciador de Rebuys</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root {
-  --green: #00c87a;
-  --green-dark: #009958;
-  --green-dim: rgba(0,200,122,0.12);
-  --gold: #f5c842;
-  --gold-dim: rgba(245,200,66,0.15);
-  --red: #ff4d4d;
-  --bg: #0a0f0d;
-  --bg2: #111815;
-  --bg3: #192119;
-  --border: rgba(255,255,255,0.08);
-  --border-green: rgba(0,200,122,0.25);
-  --text: #e8f0eb;
-  --text-muted: #6b8070;
-  --text-dim: #3a5040;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Rebuys e Add-ons - Poker Tournament</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a472a 0%, #0e2a1a 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
 
-/* Background felt texture */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,200,122,0.06) 0%, transparent 60%),
-    repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.005) 2px, rgba(255,255,255,0.005) 4px);
-  pointer-events: none;
-  z-index: 0;
-}
+        h1 {
+            text-align: center;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
 
-/* ====== HEADER ====== */
-.header {
-  position: relative;
-  z-index: 10;
-  padding: 40px 40px 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 24px;
-}
+        .subtitle {
+            text-align: center;
+            color: #ccc;
+            margin-bottom: 30px;
+        }
 
-.header-left h1 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: clamp(48px, 8vw, 96px);
-  letter-spacing: 0.04em;
-  line-height: 0.9;
-  color: var(--text);
-  text-shadow: 0 0 60px rgba(0,200,122,0.3);
-}
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
 
-.header-left h1 span {
-  color: var(--green);
-  display: block;
-}
+        .players-panel {
+            background: rgba(0,0,0,0.85);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #ffd700;
+        }
 
-.header-left p {
-  margin-top: 12px;
-  font-size: 13px;
-  color: var(--text-muted);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
+        .config-panel {
+            background: rgba(0,0,0,0.85);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #ffd700;
+        }
 
-.header-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-  padding-top: 8px;
-}
+        .panel-title {
+            font-size: 1.3em;
+            color: #ffd700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ffd700;
+        }
 
-.chip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--bg2);
-  border: 0.5px solid var(--border);
-  border-radius: 40px;
-  padding: 8px 16px;
-  font-size: 13px;
-  color: var(--text-muted);
-}
+        .players-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
 
-.chip .dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.chip .val { color: var(--text); font-weight: 600; font-family: 'DM Mono', monospace; }
+        .player-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
 
-/* ====== MAIN LAYOUT ====== */
-.main {
-  position: relative;
-  z-index: 10;
-  padding: 32px 40px 60px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
+        .player-name {
+            font-weight: bold;
+            color: #ffd700;
+            min-width: 100px;
+        }
 
-/* ====== IMPORT SECTION ====== */
-.section-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  margin-bottom: 12px;
-}
+        .player-controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
 
-.import-area {
-  border: 1.5px dashed var(--border-green);
-  border-radius: 16px;
-  padding: 28px 32px;
-  margin-bottom: 32px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  background: var(--green-dim);
-}
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
 
-.import-area:hover, .import-area.drag-over {
-  border-color: var(--green);
-  background: rgba(0,200,122,0.18);
-}
+        .control-group label {
+            color: #ccc;
+            font-size: 12px;
+        }
 
-.import-icon {
-  width: 48px; height: 48px;
-  border-radius: 12px;
-  background: var(--green-dim);
-  border: 1px solid var(--border-green);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px;
-  flex-shrink: 0;
-}
+        .control-group button {
+            background: #28a745;
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
 
-.import-text h4 { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
-.import-text p { font-size: 13px; color: var(--text-muted); }
-.import-text code {
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  color: var(--green);
-  background: var(--bg);
-  padding: 2px 6px;
-  border-radius: 4px;
-}
+        .control-group button.minus {
+            background: #dc3545;
+        }
 
-#csvFileInput { display: none; }
+        .control-group span {
+            color: #00ff00;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
 
-/* ====== SUMMARY CARDS ====== */
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 32px;
-}
+        .chips-total {
+            color: #00ffff;
+            font-size: 12px;
+            min-width: 100px;
+        }
 
-.summary-card {
-  background: var(--bg2);
-  border: 0.5px solid var(--border);
-  border-radius: 14px;
-  padding: 18px 20px;
-  transition: border-color 0.2s;
-}
+        .config-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
 
-.summary-card:hover { border-color: var(--border-green); }
+        .config-field {
+            flex: 1;
+        }
 
-.summary-card .s-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  margin-bottom: 8px;
-}
+        .config-field label {
+            display: block;
+            color: #ffd700;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
 
-.summary-card .s-val {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 42px;
-  letter-spacing: 0.02em;
-  line-height: 1;
-  color: var(--text);
-}
+        .config-field input {
+            width: 100%;
+            padding: 8px;
+            background: #1a1a2e;
+            border: 1px solid #ffd700;
+            border-radius: 5px;
+            color: white;
+        }
 
-.summary-card .s-val.green { color: var(--green); }
-.summary-card .s-val.gold { color: var(--gold); }
+        .btn {
+            background: #ffd700;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
 
-.summary-card .s-sub {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 4px;
-}
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
 
-/* ====== TABLE ====== */
-.table-wrap {
-  background: var(--bg2);
-  border: 0.5px solid var(--border);
-  border-radius: 18px;
-  overflow: hidden;
-  margin-bottom: 32px;
-}
+        .btn-copy {
+            background: #007bff;
+            color: white;
+        }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
+        pre {
+            background: #0a0a0a;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 10px;
+            max-height: 500px;
+            overflow-y: auto;
+            color: #00ff00;
+            font-family: monospace;
+            margin-top: 15px;
+        }
 
-thead th {
-  background: var(--bg3);
-  padding: 14px 20px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  text-align: left;
-  border-bottom: 0.5px solid var(--border);
-}
+        .status {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            text-align: center;
+        }
 
-thead th:last-child { text-align: right; }
-
-tbody tr {
-  border-bottom: 0.5px solid var(--border);
-  transition: background 0.15s;
-}
-
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: rgba(255,255,255,0.02); }
-
-tbody td {
-  padding: 14px 20px;
-  font-size: 14px;
-  color: var(--text);
-  vertical-align: middle;
-}
-
-.player-name {
-  font-weight: 500;
-  font-size: 15px;
-}
-
-.player-uuid {
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-top: 2px;
-}
-
-/* Number inputs */
-.num-ctrl {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  background: var(--bg);
-  border: 0.5px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  width: fit-content;
-}
-
-.num-ctrl button {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 18px;
-  width: 32px; height: 34px;
-  cursor: pointer;
-  transition: all 0.15s;
-  display: flex; align-items: center; justify-content: center;
-  line-height: 1;
-}
-
-.num-ctrl button:hover { background: var(--bg3); color: var(--text); }
-
-.num-ctrl input {
-  background: none;
-  border: none;
-  color: var(--text);
-  font-family: 'DM Mono', monospace;
-  font-size: 15px;
-  font-weight: 500;
-  width: 42px;
-  text-align: center;
-  outline: none;
-  padding: 0;
-}
-
-.num-ctrl input::-webkit-outer-spin-button,
-.num-ctrl input::-webkit-inner-spin-button { -webkit-appearance: none; }
-
-/* Total per player */
-.player-total {
-  font-family: 'DM Mono', monospace;
-  font-size: 14px;
-  font-weight: 500;
-  text-align: right;
-}
-
-.total-badge {
-  display: inline-flex;
-  align-items: center;
-  background: var(--gold-dim);
-  border: 0.5px solid rgba(245,200,66,0.3);
-  border-radius: 20px;
-  padding: 4px 12px;
-  color: var(--gold);
-  font-size: 13px;
-  font-weight: 600;
-  font-family: 'DM Mono', monospace;
-}
-
-/* ====== ACTION BUTTONS ====== */
-.actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-  border: none;
-  text-decoration: none;
-}
-
-.btn-outline {
-  background: none;
-  border: 0.5px solid var(--border);
-  color: var(--text-muted);
-}
-.btn-outline:hover { border-color: var(--border-green); color: var(--text); background: var(--green-dim); }
-
-.btn-green {
-  background: var(--green);
-  color: #0a0f0d;
-  font-weight: 600;
-}
-.btn-green:hover { background: #00e088; }
-.btn-green:active { transform: scale(0.98); }
-
-.btn-icon { font-size: 16px; }
-
-/* ====== OUTPUT PANEL ====== */
-.output-panel {
-  background: var(--bg2);
-  border: 0.5px solid var(--border-green);
-  border-radius: 18px;
-  overflow: hidden;
-  margin-top: 32px;
-  display: none;
-}
-
-.output-panel.visible { display: block; animation: slideUp 0.3s ease; }
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.output-header {
-  background: var(--bg3);
-  padding: 14px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 0.5px solid var(--border);
-}
-
-.output-header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.output-dot {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 8px var(--green);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-.output-header span {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.output-body {
-  padding: 20px;
-}
-
-textarea#outputCode {
-  width: 100%;
-  background: var(--bg);
-  border: 0.5px solid var(--border);
-  border-radius: 10px;
-  color: var(--green);
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  line-height: 1.6;
-  padding: 16px;
-  resize: vertical;
-  min-height: 180px;
-  outline: none;
-}
-
-.copy-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.copy-success {
-  font-size: 13px;
-  color: var(--green);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.copy-success.show { opacity: 1; }
-
-/* ====== FOOTER DIVIDER ====== */
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin: 32px 0;
-}
-.divider-line {
-  flex: 1;
-  height: 0.5px;
-  background: var(--border);
-}
-.divider-text {
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-}
-
-/* ====== RESPONSIVE ====== */
-@media (max-width: 800px) {
-  .header { padding: 24px 20px 0; flex-direction: column; }
-  .header-right { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
-  .main { padding: 24px 20px 60px; }
-  .summary-grid { grid-template-columns: repeat(2, 1fr); }
-  thead th:nth-child(2) { display: none; }
-  tbody td:nth-child(2) { display: none; }
-}
-
-@media (max-width: 500px) {
-  .summary-grid { grid-template-columns: 1fr 1fr; }
-}
-</style>
+        .status.success {
+            background: #28a745;
+            color: white;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>🎰 EDITOR DE REBUYS E ADD-ONS 🎰</h1>
+        <div class="subtitle">Altere os valores e clique em "GERAR CÓDIGO"</div>
 
-<!-- HEADER -->
-<header class="header">
-  <div class="header-left">
-    <h1>POKER DE <span>QUARTA</span></h1>
-    <p>Gerenciador de Rebuys &amp; Add-ons</p>
-  </div>
-  <div class="header-right">
-    <div class="chip">
-      <div class="dot" style="background:#00c87a;box-shadow:0 0 6px #00c87a"></div>
-      Buy-in <span class="val">R$ 30</span>
-    </div>
-    <div class="chip">
-      <div class="dot" style="background:#f5c842;box-shadow:0 0 6px #f5c842"></div>
-      Rebuy <span class="val">R$ 20</span>
-    </div>
-    <div class="chip">
-      <div class="dot" style="background:#8b6fff;box-shadow:0 0 6px #8b6fff"></div>
-      Add-on <span class="val">R$ 50</span>
-    </div>
-  </div>
-</header>
+        <div class="main-content">
+            <!-- Lista de Jogadores -->
+            <div class="players-panel">
+                <div class="panel-title">👥 JOGADORES</div>
+                <div id="playersList" class="players-list"></div>
+            </div>
 
-<!-- MAIN -->
-<main class="main">
+            <!-- Configurações e Código -->
+            <div class="config-panel">
+                <div class="panel-title">⚙️ CONFIGURAÇÕES</div>
+                
+                <div class="config-row">
+                    <div class="config-field">
+                        <label>Fee Buy-in (R$)</label>
+                        <input type="number" id="buyinFee" value="30">
+                    </div>
+                    <div class="config-field">
+                        <label>Fee Rebuy (R$)</label>
+                        <input type="number" id="rebuyFee" value="20">
+                    </div>
+                    <div class="config-field">
+                        <label>Fee Add-on (R$)</label>
+                        <input type="number" id="addonFee" value="50">
+                    </div>
+                </div>
+                <div class="config-row">
+                    <div class="config-field">
+                        <label>Chips por Buy-in/Rebuy</label>
+                        <input type="number" id="chipsBuyin" value="15000">
+                    </div>
+                    <div class="config-field">
+                        <label>Chips por Add-on</label>
+                        <input type="number" id="chipsAddon" value="50000">
+                    </div>
+                    <div class="config-field">
+                        <label>Round do Add-on</label>
+                        <input type="number" id="addonRound" value="10">
+                    </div>
+                </div>
 
-  <!-- IMPORT -->
-  <div class="section-label">Importar dados</div>
-  <div class="import-area" id="dropZone" onclick="document.getElementById('csvFileInput').click()">
-    <div class="import-icon">📂</div>
-    <div class="import-text">
-      <h4>Importar CSV com rebuys e add-ons</h4>
-      <p>Clique ou arraste um arquivo <code>.csv</code> — formato: <code>Nome, Rebuys, AddOns</code></p>
-    </div>
-    <input type="file" id="csvFileInput" accept=".csv,.txt">
-  </div>
+                <button class="btn" onclick="generateCode()">🔧 GERAR CÓDIGO</button>
+                <button class="btn btn-copy" onclick="copyCode()">📋 COPIAR</button>
+                <button class="btn btn-success" onclick="resetToOriginal()">🔄 RESETAR ORIGINAL</button>
 
-  <!-- SUMMARY -->
-  <div class="summary-grid" id="summaryGrid">
-    <div class="summary-card">
-      <div class="s-label">Jogadores</div>
-      <div class="s-val" id="sumPlayers">11</div>
-      <div class="s-sub">no torneio</div>
-    </div>
-    <div class="summary-card">
-      <div class="s-label">Total Rebuys</div>
-      <div class="s-val green" id="sumRebuys">0</div>
-      <div class="s-sub">× R$ 20 cada</div>
-    </div>
-    <div class="summary-card">
-      <div class="s-label">Total Add-ons</div>
-      <div class="s-val" style="color:#8b6fff" id="sumAddons">0</div>
-      <div class="s-sub">× R$ 50 cada</div>
-    </div>
-    <div class="summary-card">
-      <div class="s-label">Arrecadado</div>
-      <div class="s-val gold" id="sumTotal">R$330</div>
-      <div class="s-sub">buy-ins + rebuys + add-ons</div>
-    </div>
-  </div>
+                <div id="status" class="status"></div>
 
-  <!-- TABLE -->
-  <div class="section-label">Jogadores</div>
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Jogador</th>
-          <th>UUID</th>
-          <th>Rebuys</th>
-          <th>Add-ons</th>
-          <th style="text-align:right">Total pago</th>
-        </tr>
-      </thead>
-      <tbody id="playerBody"></tbody>
-    </table>
-  </div>
-
-  <!-- ACTIONS -->
-  <div class="actions">
-    <button class="btn btn-green" onclick="generateOutput()">
-      <span class="btn-icon">⚡</span> Gerar código do torneio
-    </button>
-    <button class="btn btn-outline" onclick="resetAll()">
-      <span class="btn-icon">↺</span> Resetar tudo
-    </button>
-    <button class="btn btn-outline" onclick="downloadCSV()">
-      <span class="btn-icon">⬇</span> Exportar CSV
-    </button>
-  </div>
-
-  <!-- OUTPUT -->
-  <div class="output-panel" id="outputPanel">
-    <div class="output-header">
-      <div class="output-header-left">
-        <div class="output-dot"></div>
-        <span>Código gerado — bloco Players</span>
-      </div>
-      <span style="font-size:12px; color:var(--text-dim)">Substitua o bloco Players no arquivo original</span>
-    </div>
-    <div class="output-body">
-      <textarea id="outputCode" readonly></textarea>
-      <div class="copy-row">
-        <button class="btn btn-green" onclick="copyOutput()">
-          <span class="btn-icon">📋</span> Copiar código
-        </button>
-        <span class="copy-success" id="copyMsg">✓ Copiado para a área de transferência!</span>
-      </div>
-    </div>
-  </div>
-
-</main>
-
-<script>
-const BUYIN = 30, REBUY_COST = 20, ADDON_COST = 50;
-
-const PLAYERS = [
-  { name:"Gregory",  uuid:"1935c2e2-84b8-434f-bbdd-c3bf290139ba", buyinTime:1776803015639 },
-  { name:"Andre",    uuid:"2fc127c1-694e-424c-9e12-887ea0a5b6ae", buyinTime:1776803009249 },
-  { name:"Eduardo",  uuid:"d6a2925b-e405-4532-806a-a2481de59f43", buyinTime:1776803009249 },
-  { name:"Julinho",  uuid:"ebb484c0-d0c1-4ec9-8066-8f2a7dd5d394", buyinTime:1776803009249 },
-  { name:"Leno",     uuid:"65e3fe0d-ffe8-48e0-a2bb-b938b1583c96", buyinTime:1776803009249 },
-  { name:"Long",     uuid:"fa41f9f6-4389-4cab-a70b-0c2e576bf593", buyinTime:1776803009249 },
-  { name:"Matheus",  uuid:"76ab831b-2dd9-4c6d-8e5d-3419e532454a", buyinTime:1776803009249 },
-  { name:"Ricardo",  uuid:"4d80120c-201e-4d2e-bde8-b17be08a6a8c", buyinTime:1776803009249 },
-  { name:"Roberto",  uuid:"8665b998-25c3-45d1-83ae-290b0f28f9a0", buyinTime:1776803009249 },
-  { name:"Sergio",   uuid:"38b39c66-f546-4471-ad38-5599a99cf105", buyinTime:1776803009249 },
-  { name:"Tigre",    uuid:"c77d6f73-3582-4433-942d-4836cce86101", buyinTime:1776803009249 },
-];
-
-// State
-const state = {};
-PLAYERS.forEach(p => { state[p.uuid] = { rebuys: 0, addons: 0 }; });
-
-function renderTable() {
-  const tbody = document.getElementById('playerBody');
-  tbody.innerHTML = '';
-  let totalRebuys = 0, totalAddons = 0, totalMoney = 0;
-
-  PLAYERS.forEach(p => {
-    const r = state[p.uuid].rebuys;
-    const a = state[p.uuid].addons;
-    const total = BUYIN + r * REBUY_COST + a * ADDON_COST;
-    totalRebuys += r; totalAddons += a; totalMoney += total;
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>
-        <div class="player-name">${p.name}</div>
-        <div class="player-uuid">${p.uuid}</div>
-      </td>
-      <td>
-        <div class="player-uuid" style="font-size:12px">${p.uuid.substring(0,18)}…</div>
-      </td>
-      <td>
-        <div class="num-ctrl">
-          <button onclick="change('${p.uuid}','rebuys',-1)">−</button>
-          <input type="number" min="0" max="99" value="${r}"
-            onchange="setState('${p.uuid}','rebuys',this.value)">
-          <button onclick="change('${p.uuid}','rebuys',1)">+</button>
+                <pre id="codeOutput">Clique em "GERAR CÓDIGO" para visualizar...</pre>
+            </div>
         </div>
-      </td>
-      <td>
-        <div class="num-ctrl">
-          <button onclick="change('${p.uuid}','addons',-1)">−</button>
-          <input type="number" min="0" max="99" value="${a}"
-            onchange="setState('${p.uuid}','addons',this.value)">
-          <button onclick="change('${p.uuid}','addons',1)">+</button>
-        </div>
-      </td>
-      <td class="player-total">
-        <span class="total-badge">R$ ${total}</span>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
+    </div>
 
-  updateSummary(totalRebuys, totalAddons, totalMoney);
-}
+    <script>
+        // Dados originais dos jogadores com seus UUIDs
+        let players = [
+            { uuid: "1935c2e2-84b8-434f-bbdd-c3bf290139ba", nickname: "Gregory", rebuys: 0, addons: 0, baseTime: 1776803015639 },
+            { uuid: "2fc127c1-694e-424c-9e12-887ea0a5b6ae", nickname: "Andre", rebuys: 0, addons: 0, baseTime: 1776803009249 },
+            { uuid: "d6a2925b-e405-4532-806a-a2481de59f43", nickname: "Eduardo", rebuys: 0, addons: 0, baseTime: 1776803009249 },
+            { uuid: "ebb484c0-d0c1-4ec9-8066-8f2a7dd5d394", nickname: "Julinho", rebuys: 0, addons: 0, baseTime: 1776803009249 },
+            { uuid: "65e3fe0d-ffe8-48e0-a2bb-b938b1583c96", nickname: "Leno", rebuys: 0, addons: 0, baseTime: 1776803009249 },
+            { uuid: "fa41f9f6-4389-4cab-a70b-0c2e576bf593", nickname: "Long", rebuys: 0, addons: 0, baseTime: 1776803009249 },
+            { uuid: "76ab831b-2dd9-4c6d-8e5d-3419e532454a", nickname: "Matheus", rebuys: 0, addons: 0, baseTime: 1776803009249 },
+            { uuid: "4d80120c-201e-4d2e-bde8-b17be08a6a8c", nickname: "Ricardo", rebuys: 0, addons: 0, baseTime: 1776803009249 },
+            { uuid: "8665b998-25c3-45d1-83ae-290b0f28f9a0", nickname: "Roberto", rebuys: 0, addons: 0, baseTime: 1776803009249 },
+            { uuid: "38b39c66-f546-4471-ad38-5599a99cf105", nickname: "Sergio", rebuys: 0, addons: 0, baseTime: 1776803009249 },
+            { uuid: "c77d6f73-3582-4433-942d-4836cce86101", nickname: "Tigre", rebuys: 0, addons: 0, baseTime: 1776803009249 }
+        ];
 
-function updateSummary(r, a, money) {
-  document.getElementById('sumRebuys').textContent = r;
-  document.getElementById('sumAddons').textContent = a;
-  document.getElementById('sumTotal').textContent = 'R$' + money;
-}
+        function renderPlayers() {
+            const container = document.getElementById('playersList');
+            container.innerHTML = players.map((player, idx) => {
+                const chipsBuyin = parseInt(document.getElementById('chipsBuyin').value);
+                const chipsAddon = parseInt(document.getElementById('chipsAddon').value);
+                const totalChips = chipsBuyin + (player.rebuys * chipsBuyin) + (player.addons * chipsAddon);
+                
+                return `
+                    <div class="player-card">
+                        <span class="player-name">${player.nickname}</span>
+                        <div class="player-controls">
+                            <div class="control-group">
+                                <label>🔁 Rebuys:</label>
+                                <button class="minus" onclick="updateRebuys(${idx}, -1)">-</button>
+                                <span>${player.rebuys}</span>
+                                <button onclick="updateRebuys(${idx}, 1)">+</button>
+                            </div>
+                            <div class="control-group">
+                                <label>💰 Add-ons:</label>
+                                <button class="minus" onclick="updateAddons(${idx}, -1)">-</button>
+                                <span>${player.addons}</span>
+                                <button onclick="updateAddons(${idx}, 1)">+</button>
+                            </div>
+                            <div class="chips-total">
+                                💎 ${totalChips.toLocaleString()} fichas
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
 
-function change(uuid, field, delta) {
-  state[uuid][field] = Math.max(0, (state[uuid][field] || 0) + delta);
-  renderTable();
-}
+        function updateRebuys(index, delta) {
+            players[index].rebuys = Math.max(0, players[index].rebuys + delta);
+            renderPlayers();
+        }
 
-function setState(uuid, field, val) {
-  state[uuid][field] = Math.max(0, parseInt(val) || 0);
-  renderTable();
-}
+        function updateAddons(index, delta) {
+            players[index].addons = Math.max(0, players[index].addons + delta);
+            renderPlayers();
+        }
 
-function resetAll() {
-  PLAYERS.forEach(p => { state[p.uuid] = { rebuys: 0, addons: 0 }; });
-  renderTable();
-  document.getElementById('outputPanel').classList.remove('visible');
-}
+        function resetToOriginal() {
+            players = players.map(p => ({ ...p, rebuys: 0, addons: 0 }));
+            renderPlayers();
+            showStatus("Valores resetados para zero!", "success");
+        }
 
-function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  lines.forEach(line => {
-    if (!line.trim() || line.startsWith('#')) return;
-    const parts = line.split(',').map(s => s.trim());
-    if (parts.length < 3) return;
-    const nameLower = parts[0].toLowerCase();
-    const r = Math.max(0, parseInt(parts[1]) || 0);
-    const a = Math.max(0, parseInt(parts[2]) || 0);
-    const p = PLAYERS.find(x => x.name.toLowerCase() === nameLower);
-    if (p) { state[p.uuid].rebuys = r; state[p.uuid].addons = a; }
-  });
-  renderTable();
-}
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            setTimeout(() => {
+                statusDiv.className = 'status';
+                statusDiv.textContent = '';
+            }, 3000);
+        }
 
-// CSV Import
-document.getElementById('csvFileInput').addEventListener('change', function(e) {
-  const f = e.target.files[0]; if (!f) return;
-  const reader = new FileReader();
-  reader.onload = ev => parseCSV(ev.target.result);
-  reader.readAsText(f);
-  this.value = '';
-});
+        function generateCode() {
+            const buyinFee = parseInt(document.getElementById('buyinFee').value);
+            const rebuyFee = parseInt(document.getElementById('rebuyFee').value);
+            const addonFee = parseInt(document.getElementById('addonFee').value);
+            const chipsBuyin = parseInt(document.getElementById('chipsBuyin').value);
+            const chipsAddon = parseInt(document.getElementById('chipsAddon').value);
+            const addonRound = parseInt(document.getElementById('addonRound').value);
 
-const dz = document.getElementById('dropZone');
-dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
-dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
-dz.addEventListener('drop', e => {
-  e.preventDefault(); dz.classList.remove('drag-over');
-  const f = e.dataTransfer.files[0]; if (!f) return;
-  const reader = new FileReader();
-  reader.onload = ev => parseCSV(ev.target.result);
-  reader.readAsText(f);
-});
+            const baseTime = 1776803009249;
+            const rebuyTime = 1776803010000;
+            const addonTime = 1776803020000;
 
-// CSV Export
-function downloadCSV() {
-  let csv = 'Nome,Rebuys,AddOns\n';
-  PLAYERS.forEach(p => {
-    csv += `${p.name},${state[p.uuid].rebuys},${state[p.uuid].addons}\n`;
-  });
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'poker_rebuys.csv'; a.click();
-  URL.revokeObjectURL(url);
-}
+            let playersMapEntries = [];
 
-// Code generation
-function buildBuyinArray(count, amount, chips, baseTime) {
-  if (count === 0) return '[]';
-  const entries = [];
-  for (let i = 0; i < count; i++) {
-    entries.push(`new GameBuyin({Time: ${baseTime + i * 10}, Round: 1, Amount: ${amount}, PersonalBounty: 0, Rake: new PerPlayerRake([0]), Chips: ${chips}, Points: 0, ProfileName: "Master"})`);
-  }
-  return `[${entries.join(', ')}]`;
-}
+            players.forEach((player, idx) => {
+                // Construir Buyins (1 buy-in + rebuys)
+                let buyinsArray = [];
+                
+                // Buy-in inicial
+                buyinsArray.push(`new GameBuyin({Time: ${player.baseTime}, Round: 1, Amount: ${buyinFee}, PersonalBounty: 0, Rake: new PerPlayerRake([0]), Chips: ${chipsBuyin}, Points: 0, ProfileName: "Master"})`);
+                
+                // Rebuys
+                for (let i = 0; i < player.rebuys; i++) {
+                    buyinsArray.push(`new GameBuyin({Time: ${rebuyTime + i * 1000}, Round: 1, Amount: ${rebuyFee}, PersonalBounty: 0, Rake: new PerPlayerRake([0]), Chips: ${chipsBuyin}, Points: 0, ProfileName: "Master"})`);
+                }
 
-function generateOutput() {
-  let totalRebuys = 0, totalAddons = 0;
-  PLAYERS.forEach(p => { totalRebuys += state[p.uuid].rebuys; totalAddons += state[p.uuid].addons; });
+                // AddOns
+                let addonsArray = [];
+                for (let i = 0; i < player.addons; i++) {
+                    addonsArray.push(`new GameAddOn({Time: ${addonTime + i * 1000}, Round: ${addonRound}, Amount: ${addonFee}, Rake: new PerPlayerRake([0]), Chips: ${chipsAddon}, Points: 0, ProfileName: "Master"})`);
+                }
 
-  const playerEntries = PLAYERS.map(p => {
-    const r = state[p.uuid].rebuys;
-    const a = state[p.uuid].addons;
-    const chipCount = 15000 + r * 15000 + a * 50000;
-    const rebuyArr = buildBuyinArray(r, REBUY_COST, 15000, 1776803050000);
-    const addonArr = buildBuyinArray(a, ADDON_COST, 50000, 1776803060000);
-    return `["${p.uuid}", new GamePlayer({ UUID: "${p.uuid}", Name: new PlayerName({UUID: "${p.uuid}", Nickname: "${p.name}", Firstname: "", Lastname: "", LastModified: 1776802998912}), Info: new PlayerInfo({UUID: "${p.uuid}", StreetAddress: "", City: "", State: "", Zipcode: "", Country: "", Phone1: "", Phone2: "", Email1: "", Email2: "", Notes: "", LastModified: 1776802998916, OptID: ""}), Buyins: [new GameBuyin({Time: ${p.buyinTime}, Round: 1, Amount: 30, PersonalBounty: 0, Rake: new PerPlayerRake([0]), Chips: 15000, Points: 0, ProfileName: "Master"})], Rebuys: ${rebuyArr}, AddOns: ${addonArr}, CashAdjustment: 0, PointsAdjustment: 0, ChipCount: ${chipCount}, NumberOfTableMoves: 1, PaidInFull: true, HitsAdjustment: 0 })]`;
-  });
+                const totalChips = chipsBuyin + (player.rebuys * chipsBuyin) + (player.addons * chipsAddon);
+                const lastModified = 1776802998912;
 
-  const code = `Players: new GamePlayers({Players: Map.from([${playerEntries.join(', ')}]), Chops: new GameChops({Chops: []}), Config: new GamePlayersConfig({TrackPlayers: true, NumberOfEntries: 0, NumberOfPlayers: 0, NumberOfRebuys: ${totalRebuys}, NumberOfAddOns: ${totalAddons}, FullCreditHit: false})})`;
+                const playerEntry = `["${player.uuid}", new GamePlayer({ UUID: "${player.uuid}", Name: new PlayerName({UUID: "${player.uuid}", Nickname: "${player.nickname}", Firstname: "", Lastname: "", LastModified: ${lastModified}}), Info: new PlayerInfo({UUID: "${player.uuid}", StreetAddress: "", City: "", State: "", Zipcode: "", Country: "", Phone1: "", Phone2: "", Email1: "", Email2: "", Notes: "", LastModified: ${lastModified}, OptID: ""}), Buyins: [${buyinsArray.join(', ')}], AddOns: [${addonsArray.join(', ')}], CashAdjustment: 0, PointsAdjustment: 0, ChipCount: ${totalChips}, NumberOfTableMoves: 1, PaidInFull: true, HitsAdjustment: 0 })]`;
+                
+                playersMapEntries.push(playerEntry);
+            });
 
-  document.getElementById('outputCode').value = code;
-  const panel = document.getElementById('outputPanel');
-  panel.classList.add('visible');
-  setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-}
+            // Seats array
+            const seatsArray = players.map(p => `"${p.uuid}"`).join(', ');
+            const locksArray = players.map(() => 'false').join(', ');
 
-function copyOutput() {
-  const ta = document.getElementById('outputCode');
-  ta.select();
-  try { document.execCommand('copy'); } catch(e) { navigator.clipboard.writeText(ta.value); }
-  const msg = document.getElementById('copyMsg');
-  msg.classList.add('show');
-  setTimeout(() => msg.classList.remove('show'), 3000);
-}
+            const fullCode = `{ V: "3.7.2", T: new Tournament({UUID: "1806768e-837c-485a-8e96-f1a12a5286d0", Title: "POKER DE QUARTA", Description: "", Notes: "", Financials: new FinancialConfig({Buyins: new BuyConfig({Allow: false, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 30, Rake: new PerPlayerRake([0]), Chips: 15000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 0, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), AddOns: new BuyConfig({Allow: false, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 50, Rake: new PerPlayerRake([0]), Chips: 50000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 0, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), Rebuys: new BuyConfig({Allow: true, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 20, Rake: new PerPlayerRake([0]), Chips: 15000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 10, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), FixedRake: new FixedRakeConfig({Type: 0, Real: new PerPlayerRake([180]), Percent: new PerPlayerRake([0]), Round: 0, RoundToNearest: 1}), HouseContribution: 0, GuaranteedPot: 0, TotalChipsAdjustment: 0, PointsForHit: 0, PointsForPlaying: new UserFormula({Text: "", Strict: false}), UseBounties: false, RestrictedBounty: true, AllowInTourneyRebuys: true, AllowRebuyOverrideAfterBustout: true}), Players: new GamePlayers({Players: Map.from([${playersMapEntries.join(', ')}]), Chops: new GameChops({Chops: []}), Config: new GamePlayersConfig({TrackPlayers: true, NumberOfEntries: 0, NumberOfPlayers: 0, NumberOfRebuys: 0, NumberOfAddOns: 0, FullCreditHit: false})}), Levels: new GameLevels({Levels: [new GameRound({Minutes: 15, SmallBlind: 100, BigBlind: 200, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [100, 200, 100, 200, 100, 200, 100, 200], Notes: ""})]}), Prizes: new GamePrizes({Prizes: [new GamePrize({Description: "1 Lugar", Type: 0, Recipient: 1, AmountType: 0, Amount: 46, Adjustment: 0, ShareRemainder: true, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 70, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "2 Lugar", Type: 0, Recipient: 2, AmountType: 0, Amount: 27, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 40, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "3 Lugar", Type: 0, Recipient: 3, AmountType: 0, Amount: 17, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 30, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "4 Lugar", Type: 0, Recipient: 4, AmountType: 0, Amount: 10, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 20, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false})], RoundPrizes: 2, RoundToNearest: 10, EstimatedPotInfo: new EstimatedPotData({UseEstimatedPot: false, EstimatedPot: 0, CalculateEstimatedPot: false, NumberOfBuyins: 0, NumberOfRebuys: 0, NumberOfAddOns: 0, CalculatedPot: 0, ShowEstimatedPot: false}), Automatic: false, AutomaticAtTop: true}), Chips: new GameChips({Chips: [new GameChip({ChipID: "1", Label: "White", ImagePath: "images\\\\chip_white.gif", Value: 100, Use: true, PerPlayer: 0}), new GameChip({ChipID: "2", Label: "Red", ImagePath: "images\\\\chip_red.gif", Value: 500, Use: true, PerPlayer: 0}), new GameChip({ChipID: "3", Label: "Blue", ImagePath: "images\\\\chip_blue.gif", Value: 1000, Use: true, PerPlayer: 0}), new GameChip({ChipID: "4", Label: "Black", ImagePath: "images\\\\chip_black.gif", Value: 5000, Use: true, PerPlayer: 0})], ChipSets: [new ChipSet({Name: "Main Set", ChipCounts: Map.from([["1", 120], ["2", 180], ["3", 120], ["4", 80]])}), new ChipSet({Name: "Set 2", ChipCounts: Map.from([["1", 120], ["2", 180], ["3", 120], ["4", 80]])}), new ChipSet({Name: "Set 3", ChipCounts: Map.from([["1", 400], ["2", 100], ["3", 0], ["4", 0]])})]}), Tables: new GameTables({AutoSuggestMovements: true, MaxPlayerDisparity: 1, Tables: [new GameTable({Name: "MESA 1", NumberOfSeats: ${players.length}, Seats: [${seatsArray}], Locks: [${locksArray}], DealerButtonSeat: 0, UUID: "dfc69d93-a845-4e62-8fe2-0b058ff7e144"})], BalanceAlgorithm: 0, RandomizeFinalTable: true, LastPlayerMove: new PlayerMovement({Time: 1776803079458, Moves: []}), UnavailableSeats: Map.from([]), CollapseFirstTables: [], CollapseLastTables: [], CollapseFirstInOrder: false, CollapseLastInOrder: false, SeatPlayersCloseToHome: false, CanSeatUnpaidPlayers: false, AutoAcceptMovementSuggestions: false}), History: new GameHistory({History: []}), StartTime: 1776778018114, CurrentPeriodDuration: 900, AccumulatedSeconds: 0, ClockRunning: false, Countdown: 0, CountdownSeconds: 0, CountdownTime: 0, CurrentLevel: 0, Events: new GameEvents({Sounds: [new Sound({Name: "clock", Path: "sounds\\\\clockSound.wav"}), new Sound({Name: "warning", Path: "sounds\\\\warningSound.wav"}), new Sound({Name: "final", Path: "sounds\\\\finalSound.wav"}), new Sound({Name: "handTimer", Path: "sounds\\\\handTimer.wav"})], Events: [new GameEvent({Description: "Clock is paused", Trigger: 1, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "clock"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Clock is unpaused", Trigger: 2, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "clock"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Level end warning", Trigger: 0, Conditions: new UserFormula({Text: "(secondsLeft = 60) or (secondsLeft = 3) or (secondsLeft = 2) or (secondsLeft = 1)", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "warning"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Level end", Trigger: 6, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "final"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Hand Timer expires", Trigger: 18, Conditions: new UserFormula({Text: "handTimerSecondsLeft = 0", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "handTimer"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "The Countdown ends", Trigger: 0, Conditions: new UserFormula({Text: "(state = 1) and (secondsLeft = 0)", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "final"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0})], MsgPropSets: Map.from([]), DefMsgDuration: 7}), LastModified: 0, Rules: new GameRules({Tokens: new TokenOverrides({Tokens: Map.from([])})})}), L: { V: "3.7.2", L: new LO.Layout({ScreenBox: new LO.ScreenBox({Contents: Map.from([])}), ScreenSets: new LO.ScreenSets({Sets: []}), GlobalProps: new LO.GlobalProps({Contents: Map.from([])}), CellBox: new LO.CellBox({Contents: Map.from([])}), BannerSets: new LO.BannerSets({Contents: Map.from([])}), OtherProps: new LO.OtherProps({Properties: Map.from([])}), Tokens: new TokenOverrides({Tokens: Map.from([])}), Settings: new LO.LayoutSettings({OptimalRes: new Dimension({Width: 1024, Height: 768})})}) } }`;
 
-// Init
-renderTable();
-</script>
+            document.getElementById('codeOutput').innerText = fullCode;
+            showStatus("✅ Código gerado com sucesso!", "success");
+        }
+
+        function copyCode() {
+            const code = document.getElementById('codeOutput').innerText;
+            navigator.clipboard.writeText(code);
+            showStatus("📋 Código copiado!", "success");
+        }
+
+        // Inicializar
+        renderPlayers();
+    </script>
 </body>
 </html>
