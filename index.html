@@ -1,1290 +1,723 @@
-Vou criar o sistema completo com a tela da TV exatamente igual à imagem anexa (estilo Tournament Director) e o painel gerencial separado.
-
-```html
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Poker de Quinta - Tournament Director</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Rebuys e Add-ons - Poker Tournament</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@300;400;700;900&display=swap');
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Roboto', sans-serif;
-            background: #0a0a0a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a472a 0%, #0e2a1a 100%);
             min-height: 100vh;
-        }
-        
-        /* ==================== TELA DA TV (ESTILO TOURNAMENT DIRECTOR) ==================== */
-        .tv-screen {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0a1a0a 0%, #051005 100%);
             padding: 20px;
-            display: none;
-            position: relative;
         }
-        
-        .tv-screen.active {
-            display: block;
-        }
-        
-        .tv-container {
+
+        .container {
             max-width: 1400px;
             margin: 0 auto;
         }
-        
-        /* Layout principal da TV */
-        .tv-main-layout {
+
+        h1 {
+            text-align: center;
+            color: #ffd700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+
+        .main-content {
             display: grid;
-            grid-template-columns: 1fr 300px;
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
-        
-        /* Área esquerda - Informações principais */
-        .tv-left {
-            background: rgba(0,0,0,0.4);
-            border-radius: 20px;
+
+        /* Painel de Jogadores */
+        .players-panel {
+            background: rgba(0,0,0,0.85);
+            border-radius: 15px;
             padding: 20px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
         }
-        
-        /* Header da TV */
-        .tv-header {
+
+        .panel-title {
+            font-size: 1.5em;
+            color: #ffd700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ffd700;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #d4a121;
         }
-        
-        .tv-header h1 {
-            font-family: 'Anton';
-            font-size: 2em;
-            color: #d4a121;
-            letter-spacing: 3px;
-        }
-        
-        .tv-stats-row {
-            display: flex;
-            gap: 30px;
-        }
-        
-        .tv-stat-item {
-            text-align: center;
-        }
-        
-        .tv-stat-label {
-            font-size: 0.7em;
-            opacity: 0.7;
-            text-transform: uppercase;
-        }
-        
-        .tv-stat-value {
-            font-family: 'Anton';
-            font-size: 1.5em;
-            color: #FFD700;
-        }
-        
-        /* Cards principais */
-        .tv-cards {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .tv-card {
-            background: rgba(0,0,0,0.6);
-            border: 2px solid #d4a121;
-            border-radius: 15px;
-            padding: 15px;
-            text-align: center;
-        }
-        
-        .tv-card-title {
+
+        .add-player-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
             font-size: 0.8em;
-            text-transform: uppercase;
-            opacity: 0.7;
-            letter-spacing: 2px;
+            transition: all 0.3s;
         }
-        
-        .tv-card-value {
-            font-family: 'Anton';
-            font-size: 2.5em;
-            color: #FFD700;
-            margin-top: 10px;
+
+        .add-player-btn:hover {
+            background: #218838;
+            transform: scale(1.05);
         }
-        
-        .tv-card-sub {
-            font-size: 0.7em;
-            opacity: 0.6;
-            margin-top: 5px;
+
+        .players-list {
+            max-height: 500px;
+            overflow-y: auto;
         }
-        
-        /* Blinds e Ante */
-        .tv-blinds-section {
+
+        .player-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #ffd700;
+        }
+
+        .player-header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .player-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .remove-player {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .player-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .stat-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .stat-label {
+            color: #ccc;
+            font-size: 0.9em;
+            min-width: 70px;
+        }
+
+        .stat-value {
             background: rgba(0,0,0,0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: #fff;
+            font-weight: bold;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .stat-btn {
+            background: #ffc107;
+            color: #000;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .stat-btn:hover {
+            background: #ffca2c;
+            transform: scale(1.05);
+        }
+
+        .stat-btn.minus {
+            background: #dc3545;
+            color: white;
+        }
+
+        .stat-btn.minus:hover {
+            background: #c82333;
+        }
+
+        .chips-info {
+            background: rgba(0,0,0,0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            color: #00ff00;
+        }
+
+        /* Painel de Configurações */
+        .config-panel {
+            background: rgba(0,0,0,0.85);
             border-radius: 15px;
             padding: 20px;
-            margin-bottom: 30px;
+            border: 2px solid #ffd700;
         }
-        
-        .tv-blind-box {
-            text-align: center;
-            flex: 1;
-        }
-        
-        .tv-blind-label {
-            font-size: 0.7em;
-            opacity: 0.6;
-            text-transform: uppercase;
-        }
-        
-        .tv-blind-value {
-            font-family: 'Anton';
-            font-size: 2em;
-            color: #FFD700;
-        }
-        
-        .tv-ante-value {
-            font-family: 'Anton';
-            font-size: 1.5em;
-            color: #ffaa00;
-        }
-        
-        /* Próximo Blind */
-        .tv-next-blind {
-            text-align: center;
-            background: rgba(212,161,33,0.2);
-            border-radius: 10px;
-            padding: 10px;
-        }
-        
-        .tv-next-blind-label {
-            font-size: 0.7em;
-            opacity: 0.6;
-        }
-        
-        .tv-next-blind-value {
-            font-family: 'Anton';
-            font-size: 1.2em;
-            color: #d4a121;
-        }
-        
-        /* Tabela de Premiação */
-        .tv-prizes {
-            background: rgba(0,0,0,0.5);
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .tv-prizes h3 {
-            font-family: 'Anton';
-            color: #d4a121;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        
-        .tv-prizes-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .tv-prize-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 10px;
-            border-bottom: 1px solid rgba(212,161,33,0.3);
-        }
-        
-        .tv-prize-place {
-            font-weight: bold;
-        }
-        
-        .tv-prize-amount {
-            color: #FFD700;
-            font-weight: bold;
-        }
-        
-        /* Rebuys e Addons */
-        .tv-rebuy-section {
-            display: flex;
-            gap: 20px;
+
+        .tournament-config {
             margin-bottom: 20px;
-        }
-        
-        .tv-rebuy-card {
-            flex: 1;
-            background: rgba(0,0,0,0.5);
-            border-radius: 10px;
-            padding: 10px;
-            text-align: center;
-        }
-        
-        .tv-rebuy-card h4 {
-            font-size: 0.8em;
-            opacity: 0.7;
-        }
-        
-        .tv-rebuy-card .value {
-            font-family: 'Anton';
-            font-size: 1.8em;
-        }
-        
-        .tv-rebuy-card.rebuy .value { color: #FF6600; }
-        .tv-rebuy-card.addon .value { color: #4CAF50; }
-        
-        /* Mesa de Jogadores */
-        .tv-players-section {
-            background: rgba(0,0,0,0.5);
-            border-radius: 15px;
             padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+
+        .config-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .config-field {
+            flex: 1;
+        }
+
+        .config-field label {
+            display: block;
+            color: #ffd700;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .config-field input {
+            width: 100%;
+            padding: 8px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #ffd700;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
             margin-top: 20px;
         }
-        
-        .tv-players-section h3 {
-            font-family: 'Anton';
-            color: #d4a121;
-            margin-bottom: 15px;
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
         }
-        
-        .tv-players-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
+
+        .btn-primary {
+            background: #ffd700;
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background: #ffed4a;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .json-output {
+            margin-top: 20px;
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #333;
+        }
+
+        .json-output h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        pre {
+            background: #0d0d0d;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.8em;
+            color: #00ff00;
             max-height: 300px;
             overflow-y: auto;
         }
-        
-        .tv-player-card {
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            padding: 8px;
-            text-align: center;
-        }
-        
-        .tv-player-pos {
-            font-size: 0.6em;
-            color: #d4a121;
-        }
-        
-        .tv-player-name {
-            font-weight: bold;
-            font-size: 0.8em;
-            margin: 3px 0;
-        }
-        
-        .tv-player-chips {
-            font-size: 0.7em;
-            color: #FFD700;
-        }
-        
-        .tv-player-badges {
-            display: flex;
-            justify-content: center;
-            gap: 3px;
-            margin-top: 3px;
-        }
-        
-        .tv-badge {
-            font-size: 0.6em;
-            padding: 1px 4px;
-            border-radius: 8px;
-        }
-        
-        .tv-badge.rebuy { background: #FF6600; }
-        .tv-badge.addon { background: #4CAF50; }
-        
-        /* Painel Direito da TV */
-        .tv-right {
-            background: rgba(0,0,0,0.5);
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .tv-cronometro {
-            margin-bottom: 30px;
-        }
-        
-        .tv-cronometro-label {
-            font-size: 0.7em;
-            opacity: 0.7;
-            text-transform: uppercase;
-        }
-        
-        .tv-cronometro-display {
-            font-family: 'Anton';
-            font-size: 4em;
-            color: #FFD700;
-            background: rgba(0,0,0,0.5);
-            border-radius: 15px;
-            padding: 20px;
-            margin: 10px 0;
-        }
-        
-        .tv-intervalo {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(212,161,33,0.1);
-            border-radius: 10px;
-        }
-        
-        .tv-intervalo .label {
-            font-size: 0.7em;
-        }
-        
-        .tv-intervalo .value {
-            font-family: 'Anton';
-            font-size: 2em;
-            color: #FF6600;
-        }
-        
-        .tv-champion {
-            margin-top: 30px;
-            padding: 15px;
-            background: rgba(212,161,33,0.2);
-            border-radius: 10px;
-        }
-        
-        .tv-champion h4 {
-            font-size: 0.7em;
-            opacity: 0.7;
-        }
-        
-        .tv-champion .name {
-            font-family: 'Anton';
-            font-size: 1.2em;
-            color: #FFD700;
-        }
-        
-        .tv-regulamento {
-            margin-top: 20px;
-            font-size: 0.6em;
-            opacity: 0.5;
-            cursor: pointer;
-        }
-        
-        /* ==================== PAINEL ADMIN ==================== */
-        .admin-panel {
-            display: none;
-            min-height: 100vh;
-            background: #0a0f0a;
-            padding: 20px;
-        }
-        
-        .admin-panel.active {
-            display: block;
-        }
-        
-        .admin-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        .admin-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: rgba(212, 161, 33, 0.1);
-            border-radius: 15px;
-            margin-bottom: 25px;
-        }
-        
-        .btn {
-            padding: 12px 24px;
+
+        .copy-btn {
+            background: #007bff;
+            color: white;
             border: none;
-            border-radius: 8px;
-            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s;
+            margin-top: 10px;
         }
-        
-        .btn-primary { background: #d4a121; color: #000; }
-        .btn-secondary { background: #2d5016; color: #fff; }
-        .btn-danger { background: #c72c48; color: #fff; }
-        .btn-success { background: #4CAF50; color: #fff; }
-        .btn-warning { background: #FF6600; color: #fff; }
-        .btn-sm { padding: 6px 12px; font-size: 0.8em; }
-        
-        .tabs {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #d4a121;
-            flex-wrap: wrap;
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
         }
-        
-        .tab-btn {
-            padding: 12px 25px;
-            background: transparent;
-            border: none;
-            color: #fff;
-            cursor: pointer;
-            font-weight: bold;
-            border-radius: 8px 8px 0 0;
-        }
-        
-        .tab-btn.active {
-            background: #d4a121;
-            color: #000;
-        }
-        
-        .tab-content {
-            display: none;
-            padding: 20px 0;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            color: #d4a121;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #2d5016;
-            background: #1a2a1a;
-            color: #fff;
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-        
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .data-table th {
-            background: #1a3d1a;
-            color: #d4a121;
-            padding: 12px;
-            text-align: left;
-        }
-        
-        .data-table td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #2d5016;
-        }
-        
-        .mesas-config {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-        
-        .mesa-config-card {
-            background: rgba(0,0,0,0.3);
-            border-radius: 15px;
-            padding: 20px;
-        }
-        
-        .mesa-config-card.preta { border: 2px solid #888; }
-        .mesa-config-card.amarela { border: 2px solid #FFD700; }
-        
-        .jogador-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
-            background: rgba(255,255,255,0.05);
-            margin: 5px 0;
-            border-radius: 8px;
-        }
-        
-        .seat-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .seat {
-            background: rgba(212, 161, 33, 0.1);
-            border: 1px solid #d4a121;
-            border-radius: 8px;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-        }
-        
-        .seat.occupied { background: rgba(76, 175, 80, 0.2); border-color: #4CAF50; }
-        .seat-number { font-size: 0.7em; color: #d4a121; }
-        .seat-player { font-weight: bold; font-size: 0.8em; margin-top: 5px; }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: #1a2a1a;
-            border: 2px solid #d4a121;
-            border-radius: 15px;
-            padding: 25px;
-            width: 90%;
-            max-width: 500px;
-        }
-        
-        .view-toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 100;
-        }
-        
-        .hidden { display: none !important; }
-        .mt-20 { margin-top: 20px; }
-        .mb-20 { margin-bottom: 20px; }
-        .text-center { text-align: center; }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>🎰 GERENCIADOR DE REBUYS E ADD-ONS 🎰</h1>
+        <div class="subtitle">Configure os jogadores e gere o código atualizado para importar no software de torneio</div>
 
-<!-- TELA DA TV - ESTILO TOURNAMENT DIRECTOR -->
-<div class="tv-screen active" id="tvScreen">
-    <div class="tv-container">
-        <div class="tv-main-layout">
-            <!-- Lado Esquerdo -->
-            <div class="tv-left">
-                <div class="tv-header">
-                    <h1>♠️ POKER DE QUINTA ♦️</h1>
-                    <div class="tv-stats-row">
-                        <div class="tv-stat-item">
-                            <div class="tv-stat-label">JOGADORES</div>
-                            <div class="tv-stat-value" id="tvTotalJogadores">0</div>
-                        </div>
-                        <div class="tv-stat-item">
-                            <div class="tv-stat-label">NÍVEL</div>
-                            <div class="tv-stat-value" id="tvNivel">1</div>
-                        </div>
-                    </div>
+        <div class="main-content">
+            <!-- Painel de Jogadores -->
+            <div class="players-panel">
+                <div class="panel-title">
+                    <span>👥 JOGADORES</span>
+                    <button class="add-player-btn" onclick="addPlayer()">+ Novo Jogador</button>
                 </div>
-                
-                <div class="tv-cards">
-                    <div class="tv-card">
-                        <div class="tv-card-title">PREMIACAO</div>
-                        <div class="tv-card-value" id="tvPremiacao">R$0</div>
-                    </div>
-                    <div class="tv-card">
-                        <div class="tv-card-title">REI DA MESA</div>
-                        <div class="tv-card-value" id="tvReiMesa">---</div>
-                    </div>
-                    <div class="tv-card">
-                        <div class="tv-card-title">MÃO DA ETAPA</div>
-                        <div class="tv-card-value" id="tvMaoEtapa">0</div>
-                        <div class="tv-card-sub">OFF</div>
-                    </div>
-                </div>
-                
-                <div class="tv-blinds-section">
-                    <div class="tv-blind-box">
-                        <div class="tv-blind-label">BLINDS</div>
-                        <div class="tv-blind-value" id="tvBlinds">$100/$200</div>
-                    </div>
-                    <div class="tv-blind-box">
-                        <div class="tv-blind-label">BIG ANTE</div>
-                        <div class="tv-ante-value" id="tvAnte">$0</div>
-                    </div>
-                    <div class="tv-blind-box">
-                        <div class="tv-blind-label">PRÓXIMO BLIND</div>
-                        <div class="tv-next-blind-value" id="tvProximoBlind">$200/$400</div>
-                    </div>
-                </div>
-                
-                <div class="tv-prizes">
-                    <h3>🏆 PREMIAÇÃO 🏆</h3>
-                    <div class="tv-prizes-list" id="tvPrizesList">
-                        <div class="tv-prize-item"><span>1° LUGAR</span><span class="tv-prize-amount">R$0</span></div>
-                        <div class="tv-prize-item"><span>2° LUGAR</span><span class="tv-prize-amount">R$0</span></div>
-                        <div class="tv-prize-item"><span>3° LUGAR</span><span class="tv-prize-amount">R$0</span></div>
-                        <div class="tv-prize-item"><span>4° LUGAR</span><span class="tv-prize-amount">R$0</span></div>
-                        <div class="tv-prize-item"><span>5° LUGAR</span><span class="tv-prize-amount">R$0</span></div>
-                    </div>
-                </div>
-                
-                <div class="tv-rebuy-section">
-                    <div class="tv-rebuy-card rebuy">
-                        <h4>RE-BUYS</h4>
-                        <div class="value" id="tvTotalRebuys">0</div>
-                    </div>
-                    <div class="tv-rebuy-card addon">
-                        <h4>ADD-ON</h4>
-                        <div class="value" id="tvTotalAddons">0</div>
-                    </div>
-                </div>
-                
-                <div class="tv-players-section">
-                    <h3>📋 JOGADORES POR MESA</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div>
-                            <h4 style="color: #888;">♠️ MESA PRETA</h4>
-                            <div class="tv-players-grid" id="tvMesaPreta"></div>
-                        </div>
-                        <div>
-                            <h4 style="color: #FFD700;">♦️ MESA AMARELA</h4>
-                            <div class="tv-players-grid" id="tvMesaAmarela"></div>
-                        </div>
-                    </div>
-                </div>
+                <div id="playersList" class="players-list"></div>
             </div>
-            
-            <!-- Lado Direito -->
-            <div class="tv-right">
-                <div class="tv-cronometro">
-                    <div class="tv-cronometro-label">INTERVALO EM</div>
-                    <div class="tv-cronometro-display" id="tvCronometro">00:00</div>
-                </div>
+
+            <!-- Painel de Configuração -->
+            <div class="config-panel">
+                <div class="panel-title">⚙️ CONFIGURAÇÕES DO TORNEIO</div>
                 
-                <div class="tv-intervalo">
-                    <div class="label">PRÓXIMO NÍVEL</div>
-                    <div class="value" id="tvProximoNivel">--:--</div>
+                <div class="tournament-config">
+                    <div class="config-row">
+                        <div class="config-field">
+                            <label>Nome do Torneio</label>
+                            <input type="text" id="tournamentTitle" value="POKER DE QUARTA">
+                        </div>
+                        <div class="config-field">
+                            <label>Valor Buy-in (R$)</label>
+                            <input type="number" id="buyinAmount" value="100">
+                        </div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-field">
+                            <label>Valor Rebuy (R$)</label>
+                            <input type="number" id="rebuyAmount" value="20">
+                        </div>
+                        <div class="config-field">
+                            <label>Valor Add-on (R$)</label>
+                            <input type="number" id="addonAmount" value="50">
+                        </div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-field">
+                            <label>Chips por Buy-in/Rebuy</label>
+                            <input type="number" id="chipsPerBuyin" value="15000">
+                        </div>
+                        <div class="config-field">
+                            <label>Chips por Add-on</label>
+                            <input type="number" id="chipsPerAddon" value="50000">
+                        </div>
+                    </div>
+                    <div class="config-row">
+                        <div class="config-field">
+                            <label>Round do Add-on</label>
+                            <input type="number" id="addonRound" value="10">
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="tv-champion">
-                    <h4>🏆 CAMPEÃO ÚLTIMA ETAPA</h4>
-                    <div class="name" id="tvUltimoCampeao">GASPAR</div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="generateJSON()">🔧 GERAR CÓDIGO ATUALIZADO</button>
+                    <button class="btn btn-success" onclick="downloadJSONFile()">💾 BAIXAR JSON</button>
                 </div>
-                
-                <div class="tv-champion">
-                    <h4>⭐ MIO DA ETAPA</h4>
-                    <div class="name" id="tvMioEtapa">---</div>
+                <div class="action-buttons">
+                    <button class="btn btn-warning" onclick="loadSampleData()">📋 CARREGAR EXEMPLO</button>
+                    <button class="btn btn-danger" onclick="clearAllPlayers()">🗑️ LIMPAR TODOS</button>
                 </div>
-                
-                <div class="tv-regulamento" id="btnRegulamento">
-                    📜 LEIA O REGULAMENTO
+
+                <div class="json-output">
+                    <h3>📄 CÓDIGO JSON PARA IMPORTAR:</h3>
+                    <pre id="jsonOutput">Clique em "GERAR CÓDIGO" para visualizar...</pre>
+                    <button class="copy-btn" onclick="copyToClipboard()">📋 Copiar código</button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- PAINEL ADMIN -->
-<div class="admin-panel" id="adminPanel">
-    <div class="admin-container">
-        <div class="admin-header">
-            <h1>🔐 PAINEL DE CONTROLE - ORGANIZAÇÃO</h1>
-            <button class="btn btn-primary" id="btnToggleView">📺 IR PARA TV</button>
-        </div>
-        
-        <div class="tabs">
-            <button class="tab-btn active" data-tab="jogadores">👥 JOGADORES</button>
-            <button class="tab-btn" data-tab="config">⚙️ CONFIGURAÇÃO</button>
-            <button class="tab-btn" data-tab="blinds">🃏 BLINDS</button>
-            <button class="tab-btn" data-tab="premios">🏆 PRÊMIOS</button>
-            <button class="tab-btn" data-tab="mesas">🪑 DISTRIBUIÇÃO</button>
-            <button class="tab-btn" data-tab="financeiro">💰 FINANCEIRO</button>
-        </div>
-        
-        <!-- ABA JOGADORES -->
-        <div class="tab-content active" id="tab-jogadores">
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Buy-in (R$)</label>
-                    <input type="number" id="configBuyin" value="100">
-                </div>
-                <div class="form-group">
-                    <label>Rebuy (R$)</label>
-                    <input type="number" id="configRebuy" value="50">
-                </div>
-                <div class="form-group">
-                    <label>Add-on (R$)</label>
-                    <input type="number" id="configAddon" value="50">
-                </div>
-                <div class="form-group">
-                    <label>Fichas Iniciais</label>
-                    <input type="number" id="configFichas" value="10000">
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Rake da Organização (%)</label>
-                    <input type="number" id="configRake" value="10">
-                </div>
-                <div class="form-group">
-                    <label>Despesas (R$)</label>
-                    <input type="number" id="configDespesas" value="0">
-                </div>
-                <div class="form-group">
-                    <label>Campeão última etapa</label>
-                    <input type="text" id="configCampeao" value="GASPAR">
-                </div>
-            </div>
-            
-            <hr class="mt-20 mb-20">
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Nome do Jogador</label>
-                    <input type="text" id="novoJogadorNome" placeholder="Nome">
-                </div>
-                <div class="form-group">
-                    <label>Mesa</label>
-                    <select id="novoJogadorMesa">
-                        <option value="preta">Mesa Preta</option>
-                        <option value="amarela">Mesa Amarela</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Posição (1-10)</label>
-                    <input type="number" id="novoJogadorPosicao" placeholder="1-10">
-                </div>
-                <div style="display: flex; align-items: flex-end;">
-                    <button class="btn btn-success" id="btnAdicionarJogador">➕ ADICIONAR</button>
-                </div>
-            </div>
-            
-            <div class="mesas-config">
-                <div class="mesa-config-card preta">
-                    <h3>♠️ MESA PRETA</h3>
-                    <div id="listaJogadoresPreta"></div>
-                </div>
-                <div class="mesa-config-card amarela">
-                    <h3>♦️ MESA AMARELA</h3>
-                    <div id="listaJogadoresAmarela"></div>
-                </div>
-            </div>
-            
-            <button class="btn btn-primary mt-20" id="btnSalvarConfigGeral">💾 SALVAR CONFIGURAÇÕES</button>
-        </div>
-        
-        <!-- ABA CONFIGURAÇÃO -->
-        <div class="tab-content" id="tab-config">
-            <div class="form-row">
-                <div class="form-group"><label>Buy-in (R$)</label><input type="number" id="configBuyin2"></div>
-                <div class="form-group"><label>Rebuy (R$)</label><input type="number" id="configRebuy2"></div>
-                <div class="form-group"><label>Add-on (R$)</label><input type="number" id="configAddon2"></div>
-                <div class="form-group"><label>Fichas Iniciais</label><input type="number" id="configFichas2"></div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>Rake (%)</label><input type="number" id="configRake2"></div>
-                <div class="form-group"><label>Despesas (R$)</label><input type="number" id="configDespesas2"></div>
-                <div class="form-group"><label>Campeão última etapa</label><input type="text" id="configCampeao2"></div>
-            </div>
-            <button class="btn btn-primary" id="btnSalvarConfig">💾 SALVAR</button>
-        </div>
-        
-        <!-- ABA BLINDS -->
-        <div class="tab-content" id="tab-blinds">
-            <div class="form-row">
-                <div class="form-group"><label>Small Blind</label><input type="number" id="blindsSB" value="100"></div>
-                <div class="form-group"><label>Big Blind</label><input type="number" id="blindsBB" value="200"></div>
-                <div class="form-group"><label>Ante</label><input type="number" id="blindsAnte" value="0"></div>
-                <div class="form-group"><label>Duração (min)</label><input type="number" id="blindsDuracao" value="20"></div>
-            </div>
-            <button class="btn btn-primary" id="btnSalvarBlinds">🃏 ATUALIZAR BLINDS</button>
-            
-            <div class="mt-20">
-                <h3>📋 ESTRUTURA DE BLINDS</h3>
-                <table class="data-table">
-                    <thead><tr><th>Nível</th><th>SB</th><th>BB</th><th>Ante</th><th>Ação</th></tr></thead>
-                    <tbody id="blindsTableBody"></tbody>
-                </table>
-                <button class="btn btn-secondary btn-sm mt-20" id="btnAddBlind">➕ ADICIONAR NÍVEL</button>
-            </div>
-        </div>
-        
-        <!-- ABA PRÊMIOS -->
-        <div class="tab-content" id="tab-premios">
-            <div class="form-row">
-                <div class="form-group"><label>Nº Premiados</label><input type="number" id="numPremiados" value="5"></div>
-                <button class="btn btn-secondary" id="btnGerarPremios">🎲 GERAR</button>
-            </div>
-            <table class="data-table mt-20">
-                <thead><tr><th>Posição</th><th>Prêmio (R$)</th><th>%</th><th>Ação</th></tr></thead>
-                <tbody id="premiosTableBody"></tbody>
-            </table>
-            <button class="btn btn-primary mt-20" id="btnSalvarPremios">💾 SALVAR</button>
-        </div>
-        
-        <!-- ABA MESAS -->
-        <div class="tab-content" id="tab-mesas">
-            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
-                <button class="btn btn-primary" id="btnDistribuirAleatorio">🎲 DISTRIBUIR ALEATORIAMENTE</button>
-                <button class="btn btn-danger" id="btnLimparMesas">🗑️ LIMPAR MESAS</button>
-            </div>
-            <div class="mesas-config">
-                <div class="mesa-config-card preta">
-                    <h3>♠️ MESA PRETA</h3>
-                    <div class="seat-grid" id="seatGridPreta"></div>
-                </div>
-                <div class="mesa-config-card amarela">
-                    <h3>♦️ MESA AMARELA</h3>
-                    <div class="seat-grid" id="seatGridAmarela"></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- ABA FINANCEIRO -->
-        <div class="tab-content" id="tab-financeiro">
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px;">
-                <div class="tv-card"><div class="tv-card-title">ARRECADAÇÃO</div><div class="tv-card-value" id="finTotal">R$0</div></div>
-                <div class="tv-card"><div class="tv-card-title">RAKE</div><div class="tv-card-value" id="finRake">R$0</div></div>
-                <div class="tv-card"><div class="tv-card-title">POTE LÍQUIDO</div><div class="tv-card-value" id="finPote">R$0</div></div>
-            </div>
-            <table class="data-table">
-                <thead><tr><th>Jogador</th><th>Mesa</th><th>Buy-in</th><th>Rebuys</th><th>Add-on</th><th>Total</th></tr></thead>
-                <tbody id="financeiroTableBody"></tbody>
-            </table>
-            <button class="btn btn-success mt-20" id="btnExportarCSV">📊 EXPORTAR CSV</button>
-        </div>
-    </div>
-</div>
+    <script>
+        let players = [];
 
-<div class="view-toggle">
-    <button class="view-toggle-btn" id="viewToggleBtn">🔧 PAINEL ADMIN</button>
-</div>
+        // Configurações do torneio
+        let tournamentSettings = {
+            uuid: "1806768e-837c-485a-8e96-f1a12a5286d0",
+            title: "POKER DE QUARTA",
+            tableUUID: "dfc69d93-a845-4e62-8fe2-0b058ff7e144"
+        };
 
-<script>
-    // Estado da aplicação
-    let state = {
-        jogadores: { preta: [], amarela: [] },
-        config: { buyin: 100, rebuy: 50, addon: 50, fichas: 10000, rake: 10, despesas: 0, campeao: "GASPAR" },
-        blinds: { sb: 100, bb: 200, ante: 0, duracao: 20, nivel: 1 },
-        premios: [{ pos: 1, valor: 720, percentual: 35 }, { pos: 2, valor: 520, percentual: 25 }, { pos: 3, valor: 380, percentual: 18 }, { pos: 4, valor: 240, percentual: 12 }, { pos: 5, valor: 140, percentual: 10 }],
-        estruturaBlinds: [
-            { nivel: 1, sb: 100, bb: 200, ante: 0 },
-            { nivel: 2, sb: 200, bb: 400, ante: 0 },
-            { nivel: 3, sb: 300, bb: 600, ante: 50 },
-            { nivel: 4, sb: 400, bb: 800, ante: 100 },
-            { nivel: 5, sb: 600, bb: 1200, ante: 150 }
-        ],
-        cronometroTempo: 1200,
-        maoEtapa: 72
-    };
-    
-    function init() {
-        carregarStorage();
-        atualizarTV();
-        atualizarListasJogadores();
-        atualizarSeats();
-        atualizarFinanceiro();
-        atualizarTabelaBlinds();
-        atualizarTabelaPremios();
-        iniciarCronometro();
-        
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-                btn.classList.add('active');
-                document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
             });
-        });
-        
-        document.getElementById('viewToggleBtn').addEventListener('click', toggleView);
-        document.getElementById('btnToggleView').addEventListener('click', toggleView);
-        document.getElementById('btnAdicionarJogador').addEventListener('click', adicionarJogador);
-        document.getElementById('btnSalvarConfig').addEventListener('click', salvarConfig);
-        document.getElementById('btnSalvarConfigGeral').addEventListener('click', salvarConfig);
-        document.getElementById('btnSalvarBlinds').addEventListener('click', salvarBlinds);
-        document.getElementById('btnSalvarPremios').addEventListener('click', salvarPremios);
-        document.getElementById('btnDistribuirAleatorio').addEventListener('click', distribuirAleatorio);
-        document.getElementById('btnLimparMesas').addEventListener('click', limparMesas);
-        document.getElementById('btnExportarCSV').addEventListener('click', exportarCSV);
-        document.getElementById('btnGerarPremios').addEventListener('click', gerarPremios);
-        document.getElementById('btnAddBlind').addEventListener('click', adicionarNivelBlind);
-        
-        carregarConfigInputs();
-    }
-    
-    function carregarStorage() {
-        const saved = localStorage.getItem('pokerManager');
-        if (saved) {
-            const data = JSON.parse(saved);
-            state.jogadores = data.jogadores || { preta: [], amarela: [] };
-            state.config = data.config || state.config;
-            state.blinds = data.blinds || state.blinds;
-            state.premios = data.premios || state.premios;
-            state.estruturaBlinds = data.estruturaBlinds || state.estruturaBlinds;
         }
-    }
-    
-    function salvarStorage() {
-        localStorage.setItem('pokerManager', JSON.stringify({
-            jogadores: state.jogadores,
-            config: state.config,
-            blinds: state.blinds,
-            premios: state.premios,
-            estruturaBlinds: state.estruturaBlinds
-        }));
-    }
-    
-    function carregarConfigInputs() {
-        document.getElementById('configBuyin').value = state.config.buyin;
-        document.getElementById('configRebuy').value = state.config.rebuy;
-        document.getElementById('configAddon').value = state.config.addon;
-        document.getElementById('configFichas').value = state.config.fichas;
-        document.getElementById('configRake').value = state.config.rake;
-        document.getElementById('configDespesas').value = state.config.despesas;
-        document.getElementById('configCampeao').value = state.config.campeao;
-        document.getElementById('configBuyin2').value = state.config.buyin;
-        document.getElementById('configRebuy2').value = state.config.rebuy;
-        document.getElementById('configAddon2').value = state.config.addon;
-        document.getElementById('configFichas2').value = state.config.fichas;
-        document.getElementById('configRake2').value = state.config.rake;
-        document.getElementById('configDespesas2').value = state.config.despesas;
-        document.getElementById('configCampeao2').value = state.config.campeao;
-        document.getElementById('blindsSB').value = state.blinds.sb;
-        document.getElementById('blindsBB').value = state.blinds.bb;
-        document.getElementById('blindsAnte').value = state.blinds.ante;
-        document.getElementById('blindsDuracao').value = state.blinds.duracao;
-    }
-    
-    function toggleView() {
-        const tv = document.getElementById('tvScreen');
-        const admin = document.getElementById('adminPanel');
-        const btn = document.getElementById('viewToggleBtn');
-        
-        if (tv.classList.contains('active')) {
-            tv.classList.remove('active');
-            admin.classList.add('active');
-            btn.textContent = '📺 IR PARA TV';
-        } else {
-            tv.classList.add('active');
-            admin.classList.remove('active');
-            btn.textContent = '🔧 PAINEL ADMIN';
-            atualizarTV();
-        }
-    }
-    
-    function adicionarJogador() {
-        const nome = document.getElementById('novoJogadorNome').value.trim();
-        const mesa = document.getElementById('novoJogadorMesa').value;
-        const posicao = parseInt(document.getElementById('novoJogadorPosicao').value);
-        
-        if (!nome) { alert('Digite o nome'); return; }
-        
-        const novo = { id: Date.now(), nome, posicao: posicao || (state.jogadores[mesa].length + 1), rebuys: 0, addon: false, fichas: state.config.fichas };
-        state.jogadores[mesa].push(novo);
-        salvarStorage();
-        atualizarListasJogadores();
-        atualizarSeats();
-        atualizarTV();
-        atualizarFinanceiro();
-        
-        document.getElementById('novoJogadorNome').value = '';
-        document.getElementById('novoJogadorPosicao').value = '';
-    }
-    
-    function removerJogador(mesa, id) {
-        state.jogadores[mesa] = state.jogadores[mesa].filter(j => j.id !== id);
-        salvarStorage();
-        atualizarListasJogadores();
-        atualizarSeats();
-        atualizarTV();
-        atualizarFinanceiro();
-    }
-    
-    function adicionarRebuy(mesa, id) {
-        const j = state.jogadores[mesa].find(j => j.id === id);
-        if (j) { j.rebuys = (j.rebuys || 0) + 1; salvarStorage(); atualizarTudo(); }
-    }
-    
-    function adicionarAddon(mesa, id) {
-        const j = state.jogadores[mesa].find(j => j.id === id);
-        if (j && !j.addon) { j.addon = true; salvarStorage(); atualizarTudo(); }
-    }
-    
-    function atualizarTudo() {
-        atualizarListasJogadores();
-        atualizarSeats();
-        atualizarTV();
-        atualizarFinanceiro();
-    }
-    
-    function atualizarListasJogadores() {
-        const containerPreta = document.getElementById('listaJogadoresPreta');
-        const containerAmarela = document.getElementById('listaJogadoresAmarela');
-        
-        containerPreta.innerHTML = state.jogadores.preta.map(j => `
-            <div class="jogador-item">
-                <div><strong>${j.nome}</strong> (Pos ${j.posicao})<br><small>Rebuys: ${j.rebuys} | Addon: ${j.addon ? 'Sim' : 'Não'}</small></div>
-                <div><button class="btn-warning btn-sm" onclick="adicionarRebuy('preta', ${j.id})">+Rebuy</button> ${!j.addon ? `<button class="btn-success btn-sm" onclick="adicionarAddon('preta', ${j.id})">+Addon</button>` : ''}<button class="btn-danger btn-sm" onclick="removerJogador('preta', ${j.id})">🗑️</button></div>
-            </div>
-        `).join('');
-        
-        containerAmarela.innerHTML = state.jogadores.amarela.map(j => `
-            <div class="jogador-item">
-                <div><strong>${j.nome}</strong> (Pos ${j.posicao})<br><small>Rebuys: ${j.rebuys} | Addon: ${j.addon ? 'Sim' : 'Não'}</small></div>
-                <div><button class="btn-warning btn-sm" onclick="adicionarRebuy('amarela', ${j.id})">+Rebuy</button> ${!j.addon ? `<button class="btn-success btn-sm" onclick="adicionarAddon('amarela', ${j.id})">+Addon</button>` : ''}<button class="btn-danger btn-sm" onclick="removerJogador('amarela', ${j.id})">🗑️</button></div>
-            </div>
-        `).join('');
-    }
-    
-    function atualizarSeats() {
-        const pretaSeats = document.getElementById('seatGridPreta');
-        const amarelaSeats = document.getElementById('seatGridAmarela');
-        
-        pretaSeats.innerHTML = Array(10).fill().map((_, i) => {
-            const j = state.jogadores.preta.find(j => j.posicao === i + 1);
-            return `<div class="seat ${j ? 'occupied' : ''}"><div class="seat-number">${i+1}</div><div class="seat-player">${j ? j.nome : 'Vago'}</div></div>`;
-        }).join('');
-        
-        amarelaSeats.innerHTML = Array(10).fill().map((_, i) => {
-            const j = state.jogadores.amarela.find(j => j.posicao === i + 1);
-            return `<div class="seat ${j ? 'occupied' : ''}"><div class="seat-number">${i+1}</div><div class="seat-player">${j ? j.nome : 'Vago'}</div></div>`;
-        }).join('');
-    }
-    
-    function distribuirAleatorio() {
-        const todos = [...state.jogadores.preta, ...state.jogadores.amarela];
-        for (let i = todos.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [todos[i], todos[j]] = [todos[j], todos[i]]; }
-        
-        state.jogadores.preta = [];
-        state.jogadores.amarela = [];
-        
-        todos.forEach((j, idx) => {
-            const mesa = idx < 10 ? 'preta' : 'amarela';
-            j.posicao = (idx % 10) + 1;
-            state.jogadores[mesa].push(j);
-        });
-        
-        salvarStorage();
-        atualizarTudo();
-    }
-    
-    function limparMesas() {
-        if (confirm('Limpar todas as mesas?')) { state.jogadores = { preta: [], amarela: [] }; salvarStorage(); atualizarTudo(); }
-    }
-    
-    function calcularTotalArrecadado() {
-        let total = 0;
-        [...state.jogadores.preta, ...state.jogadores.amarela].forEach(j => {
-            total += state.config.buyin + (j.rebuys * state.config.rebuy) + (j.addon ? state.config.addon : 0);
-        });
-        return total;
-    }
-    
-    function atualizarFinanceiro() {
-        const total = calcularTotalArrecadado();
-        const rake = total * (state.config.rake / 100);
-        const pote = total - rake - state.config.despesas;
-        
-        document.getElementById('finTotal').innerHTML = `R$ ${total}`;
-        document.getElementById('finRake').innerHTML = `R$ ${rake}`;
-        document.getElementById('finPote').innerHTML = `R$ ${pote}`;
-        
-        const todos = [...state.jogadores.preta, ...state.jogadores.amarela];
-        document.getElementById('financeiroTableBody').innerHTML = todos.map(j => {
-            const totalGasto = state.config.buyin + (j.rebuys * state.config.rebuy) + (j.addon ? state.config.addon : 0);
-            return `<tr><td>${j.nome}</td><td>${state.jogadores.preta.includes(j) ? 'Preta' : 'Amarela'}</td><td>R$ ${state.config.buyin}</td><td>${j.rebuys || 0}</td><td>${j.addon ? 'Sim' : 'Não'}</td><td><strong>R$ ${totalGasto}</strong></td></tr>`;
-        }).join('');
-    }
-    
-    function atualizarTV() {
-        const todos = [...state.jogadores.preta, ...state.jogadores.amarela];
-        const totalRebuys = todos.reduce((s, j) => s + (j.rebuys || 0), 0);
-        const totalAddons = todos.filter(j => j.addon).length;
-        const totalArrecadado = calcularTotalArrecadado();
-        const poteLiquido = totalArrecadado - (totalArrecadado * state.config.rake / 100) - state.config.despesas;
-        
-        document.getElementById('tvTotalJogadores').textContent = todos.length;
-        document.getElementById('tvTotalRebuys').textContent = totalRebuys;
-        document.getElementById('tvTotalAddons').textContent = totalAddons;
-        document.getElementById('tvPremiacao').textContent = `R$ ${poteLiquido}`;
-        document.getElementById('tvBlinds').textContent = `$${state.blinds.sb}/$${state.blinds.bb}`;
-        document.getElementById('tvAnte').textContent = `$${state.blinds.ante}`;
-        document.getElementById('tvNivel').textContent = state.blinds.nivel;
-        document.getElementById('tvMaoEtapa').textContent = state.maoEtapa;
-        document.getElementById('tvUltimoCampeao').textContent = state.config.campeao;
-        
-        const proximoBlind = state.estruturaBlinds[state.blinds.nivel] || { sb: state.blinds.sb * 2, bb: state.blinds.bb * 2 };
-        document.getElementById('tvProximoBlind').textContent = `$${proximoBlind.sb}/$${proximoBlind.bb}`;
-        
-        // Prêmios
-        const prizesHtml = state.premios.map(p => `<div class="tv-prize-item"><span>${p.pos}° LUGAR</span><span class="tv-prize-amount">R$ ${p.valor}</span></div>`).join('');
-        document.getElementById('tvPrizesList').innerHTML = prizesHtml;
-        
-        // Jogadores por mesa
-        const pretaGrid = document.getElementById('tvMesaPreta');
-        const amarelaGrid = document.getElementById('tvMesaAmarela');
-        
-        pretaGrid.innerHTML = state.jogadores.preta.sort((a,b) => a.posicao - b.posicao).map(j => `
-            <div class="tv-player-card">
-                <div class="tv-player-pos">${j.posicao}</div>
-                <div class="tv-player-name">${j.nome}</div>
-                <div class="tv-player-chips">${j.fichas}</div>
-                <div class="tv-player-badges">${j.rebuys > 0 ? `<span class="tv-badge rebuy">${j.rebuys}R</span>` : ''}${j.addon ? '<span class="tv-badge addon">A</span>' : ''}</div>
-            </div>
-        `).join('');
-        
-        amarelaGrid.innerHTML = state.jogadores.amarela.sort((a,b) => a.posicao - b.posicao).map(j => `
-            <div class="tv-player-card">
-                <div class="tv-player-pos">${j.posicao}</div>
-                <div class="tv-player-name">${j.nome}</div>
-                <div class="tv-player-chips">${j.fichas}</div>
-                <div class="tv-player-badges">${j.rebuys > 0 ? `<span class="tv-badge rebuy">${j.rebuys}R</span>` : ''}${j.addon ? '<span class="tv-badge addon">A</span>' : ''}</div>
-            </div>
-        `).join('');
-        
-        atualizarFinanceiro();
-    }
-    
-    function salvarConfig() {
-        state.config.buyin = parseInt(document.getElementById('configBuyin2').value) || 100;
-        state.config.rebuy = parseInt(document.getElementById('configRebuy2').value) || 50;
-        state.config.addon = parseInt(document.getElementById('configAddon2').value) || 50;
-        state.config.fichas = parseInt(document.getElementById('configFichas2').value) || 10000;
-        state.config.rake = parseInt(document.getElementById('configRake2').value) || 10;
-        state.config.despesas = parseInt(document.getElementById('configDespesas2').value) || 0;
-        state.config.campeao = document.getElementById('configCampeao2').value || "GASPAR";
-        
-        carregarConfigInputs();
-        salvarStorage();
-        atualizarTV();
-        alert('Configurações salvas!');
-    }
-    
-    function salvarBlinds() {
-        state.blinds.sb = parseInt(document.getElementById('blindsSB').value) || 100;
-        state.blinds.bb = parseInt(document.getElementById('blindsBB').value) || 200;
-        state.blinds.ante = parseInt(document.getElementById('blindsAnte').value) || 0;
-        state.blinds.duracao = parseInt(document.getElementById('blindsDuracao').value) || 20;
-        salvarStorage();
-        atualizarTV();
-        alert('Blinds atualizados!');
-    }
-    
-    function salvarPremios() {
-        alert('Prêmios salvos!');
-        atualizarTV();
-    }
-    
-    function gerarPremios() {
-        const num = parseInt(document.getElementById('numPremiados').value) || 5;
-        const totalPote = calcularTotalArrecadado() * (1 - state.config.rake / 100) - state.config.despesas;
-        const percentuais = [35, 25, 18, 12, 10];
-        
-        state.premios = [];
-        for (let i = 0; i < num && i < percentuais.length; i++) {
-            state.premios.push({ pos: i+1, valor: Math.round(totalPote * percentuais[i] / 100), percentual: percentuais[i] });
-        }
-        salvarStorage();
-        atualizarTabelaPremios();
-        atualizarTV();
-    }
-    
-    function atualizarTabelaPremios() {
-        const tbody = document.getElementById('premiosTableBody');
-        tbody.innerHTML = state.premios.map((p, i) => `
-            <tr><td>${p.pos}º</td><td><input type="number" class="premio-input" data-index="${i}" value="${p.valor}" style="width:100px"></td><td>${p.percentual}%</td><td><button class="btn-danger btn-sm" onclick="removerPremio(${i})">❌</button></td></tr>
-        `).join('');
-        
-        document.querySelectorAll('.premio-input').forEach(inp => {
-            inp.addEventListener('change', (e) => {
-                const idx = parseInt(e.target.dataset.index);
-                state.premios[idx].valor = parseFloat(e.target.value);
-                salvarStorage();
-                atualizarTV();
+
+        function addPlayer() {
+            const newUUID = generateUUID();
+            players.push({
+                uuid: newUUID,
+                nickname: `Jogador ${players.length + 1}`,
+                buyins: 1,
+                rebuys: 0,
+                addons: 0,
+                seatIndex: players.length,
+                chipCount: 15000
             });
-        });
-    }
-    
-    function removerPremio(index) {
-        state.premios.splice(index, 1);
-        state.premios.forEach((p, i) => p.pos = i+1);
-        salvarStorage();
-        atualizarTabelaPremios();
-        atualizarTV();
-    }
-    
-    function atualizarTabelaBlinds() {
-        const tbody = document.getElementById('blindsTableBody');
-        tbody.innerHTML = state.estruturaBlinds.map((b, i) => `
-            <tr><td>${b.nivel}</td><td>$${b.sb}</td><td>$${b.bb}</td><td>$${b.ante}</td><td><button class="btn-danger btn-sm" onclick="removerNivelBlind(${i})">❌</button></td></tr>
-        `).join('');
-    }
-    
-    function adicionarNivelBlind() {
-        const ultimo = state.estruturaBlinds[state.estruturaBlinds.length-1];
-        state.estruturaBlinds.push({ nivel: state.estruturaBlinds.length+1, sb: (ultimo?.sb || 100)*2, bb: (ultimo?.bb || 200)*2, ante: (ultimo?.ante || 0)+50 });
-        salvarStorage();
-        atualizarTabelaBlinds();
-    }
-    
-    function removerNivelBlind(index) {
-        state.estruturaBlinds.splice(index, 1);
-        state.estruturaBlinds.forEach((b, i) => b.nivel = i+1);
-        salvarStorage();
-        atualizarTabelaBlinds();
-    }
-    
-    function exportarCSV() {
-        const todos = [...state.jogadores.preta, ...state.jogadores.amarela];
-        let csv = 'Nome,Mesa,Posição,Buy-in,Rebuys,Addon,Total Gasto\n';
-        todos.forEach(j => {
-            const mesa = state.jogadores.preta.includes(j) ? 'Preta' : 'Amarela';
-            const total = state.config.buyin + (j.rebuys * state.config.rebuy) + (j.addon ? state.config.addon : 0);
-            csv += `"${j.nome}",${mesa},${j.posicao},${state.config.buyin},${j.rebuys || 0},${j.addon ? 'Sim' : 'Não'},${total}\n`;
-        });
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `poker_${new Date().toISOString().slice(0,19)}.csv`;
-        link.click();
-    }
-    
-    function iniciarCronometro() {
-        let tempo = state.blinds.duracao * 60;
-        setInterval(() => {
-            if (tempo > 0) tempo--;
-            const min = Math.floor(tempo / 60);
-            const seg = tempo % 60;
-            document.getElementById('tvCronometro').textContent = `${min.toString().padStart(2,'0')}:${seg.toString().padStart(2,'0')}`;
-            document.getElementById('tvProximoNivel').textContent = `${Math.floor(tempo/60)}:${(tempo%60).toString().padStart(2,'0')}`;
-        }, 1000);
-    }
-    
-    window.adicionarRebuy = adicionarRebuy;
-    window.adicionarAddon = adicionarAddon;
-    window.removerJogador = removerJogador;
-    window.removerPremio = removerPremio;
-    window.removerNivelBlind = removerNivelBlind;
-    
-    init();
-</script>
+            renderPlayers();
+        }
+
+        function removePlayer(index) {
+            players.splice(index, 1);
+            renderPlayers();
+        }
+
+        function updateRebuys(index, delta) {
+            const newValue = players[index].rebuys + delta;
+            if (newValue >= 0) {
+                players[index].rebuys = newValue;
+                updateChipCount(index);
+            }
+            renderPlayers();
+        }
+
+        function updateAddons(index, delta) {
+            const newValue = players[index].addons + delta;
+            if (newValue >= 0) {
+                players[index].addons = newValue;
+                updateChipCount(index);
+            }
+            renderPlayers();
+        }
+
+        function updatePlayerName(index, newName) {
+            players[index].nickname = newName;
+            renderPlayers();
+        }
+
+        function updateChipCount(index) {
+            const buyinChips = parseInt(document.getElementById('chipsPerBuyin').value);
+            const addonChips = parseInt(document.getElementById('chipsPerAddon').value);
+            const totalRebuys = players[index].rebuys;
+            const totalAddons = players[index].addons;
+            
+            players[index].chipCount = buyinChips + (totalRebuys * buyinChips) + (totalAddons * addonChips);
+        }
+
+        function recalcAllChips() {
+            players.forEach((_, idx) => updateChipCount(idx));
+        }
+
+        function renderPlayers() {
+            const container = document.getElementById('playersList');
+            if (!players.length) {
+                container.innerHTML = '<div style="text-align:center; color:#888; padding:40px;">Nenhum jogador cadastrado.<br>Clique em "+ Novo Jogador" para começar.</div>';
+                return;
+            }
+
+            container.innerHTML = players.map((player, idx) => `
+                <div class="player-card">
+                    <div class="player-header">
+                        <input type="text" class="player-name" value="${player.nickname}" 
+                               style="background:transparent; border:1px solid #ffd700; color:#ffd700; padding:5px; border-radius:5px;"
+                               onchange="updatePlayerName(${idx}, this.value)">
+                        <button class="remove-player" onclick="removePlayer(${idx})">✖ Remover</button>
+                    </div>
+                    <div class="player-stats">
+                        <div class="stat-control">
+                            <span class="stat-label">🎯 Rebuys:</span>
+                            <button class="stat-btn minus" onclick="updateRebuys(${idx}, -1)">-</button>
+                            <span class="stat-value">${player.rebuys}</span>
+                            <button class="stat-btn" onclick="updateRebuys(${idx}, 1)">+</button>
+                        </div>
+                        <div class="stat-control">
+                            <span class="stat-label">💰 Add-ons:</span>
+                            <button class="stat-btn minus" onclick="updateAddons(${idx}, -1)">-</button>
+                            <span class="stat-value">${player.addons}</span>
+                            <button class="stat-btn" onclick="updateAddons(${idx}, 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="chips-info">
+                        💎 Fichas totais: ${player.chipCount.toLocaleString()} | 
+                        Buy-in: 1 | Rebuys: ${player.rebuys} | Add-ons: ${player.addons}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function generateJSON() {
+            const buyinAmount = parseInt(document.getElementById('buyinAmount').value);
+            const rebuyAmount = parseInt(document.getElementById('rebuyAmount').value);
+            const addonAmount = parseInt(document.getElementById('addonAmount').value);
+            const chipsPerBuyin = parseInt(document.getElementById('chipsPerBuyin').value);
+            const chipsPerAddon = parseInt(document.getElementById('chipsPerAddon').value);
+            const addonRound = parseInt(document.getElementById('addonRound').value);
+            const tournamentTitle = document.getElementById('tournamentTitle').value;
+
+            recalcAllChips();
+
+            const playersJSON = {};
+            const timestamp = Date.now();
+
+            players.forEach((player, idx) => {
+                const buyins = [];
+                // Buy-in inicial
+                buyins.push({
+                    Time: timestamp - 100000 + idx,
+                    Round: 1,
+                    Amount: buyinAmount,
+                    PersonalBounty: 0,
+                    Rake: { "0": 0 },
+                    Chips: chipsPerBuyin,
+                    Points: 0,
+                    ProfileName: "Master",
+                    Seat: {
+                        TableName: "MESA 1",
+                        SeatIndex: player.seatIndex,
+                        Locked: false,
+                        TableUUID: tournamentSettings.tableUUID
+                    }
+                });
+
+                // Rebuys
+                for (let i = 0; i < player.rebuys; i++) {
+                    buyins.push({
+                        Time: timestamp - 50000 + i * 1000,
+                        Round: 1,
+                        Amount: rebuyAmount,
+                        PersonalBounty: 0,
+                        Rake: { "0": 0 },
+                        Chips: chipsPerBuyin,
+                        Points: 0,
+                        ProfileName: "Master",
+                        Seat: {
+                            TableName: "MESA 1",
+                            SeatIndex: player.seatIndex,
+                            Locked: false,
+                            TableUUID: tournamentSettings.tableUUID
+                        }
+                    });
+                }
+
+                const addons = [];
+                for (let i = 0; i < player.addons; i++) {
+                    addons.push({
+                        Time: timestamp + 10000 + i * 1000,
+                        Round: addonRound,
+                        Amount: addonAmount,
+                        Rake: { "0": 0 },
+                        Chips: chipsPerAddon,
+                        Points: 0,
+                        ProfileName: "Master"
+                    });
+                }
+
+                playersJSON[player.uuid] = {
+                    UUID: player.uuid,
+                    Name: {
+                        UUID: player.uuid,
+                        Nickname: player.nickname,
+                        Firstname: "",
+                        Lastname: "",
+                        LastModified: timestamp
+                    },
+                    Info: {
+                        UUID: player.uuid,
+                        StreetAddress: "",
+                        City: "",
+                        State: "",
+                        Zipcode: "",
+                        Country: "",
+                        Phone1: "",
+                        Phone2: "",
+                        Email1: "",
+                        Email2: "",
+                        Notes: "",
+                        LastModified: timestamp,
+                        OptID: "",
+                        ImageRot: 0
+                    },
+                    Buyins: buyins,
+                    AddOns: addons,
+                    CashAdjustment: 0,
+                    PointsAdjustment: 0,
+                    ChipCount: player.chipCount,
+                    NumberOfTableMoves: 1,
+                    PaidInFull: true,
+                    HitsAdjustment: 0
+                };
+            });
+
+            const finalJSON = {
+                V: "3.7.2",
+                T: {
+                    UUID: tournamentSettings.uuid,
+                    Title: tournamentTitle,
+                    Description: "",
+                    Notes: "",
+                    Financials: {
+                        Buyins: {
+                            Allow: false,
+                            Profiles: [{
+                                Name: "Master",
+                                Enabled: true,
+                                AllowChange: true,
+                                Fee: buyinAmount,
+                                Rake: { "0": 0 },
+                                Chips: chipsPerBuyin,
+                                Points: 0,
+                                BountyChipCost: 0
+                            }],
+                            DefIndex: 0,
+                            LastRound: 0,
+                            MaxPerPlayer: 0,
+                            MaxTotal: 0,
+                            MinPlayers: 0
+                        },
+                        AddOns: {
+                            Allow: true,
+                            Profiles: [{
+                                Name: "Master",
+                                Enabled: true,
+                                AllowChange: true,
+                                Fee: addonAmount,
+                                Rake: { "0": 0 },
+                                Chips: chipsPerAddon,
+                                Points: 0,
+                                BountyChipCost: 0
+                            }],
+                            DefIndex: 0,
+                            LastRound: addonRound,
+                            MaxPerPlayer: 0,
+                            MaxTotal: 0,
+                            MinPlayers: 0
+                        },
+                        Rebuys: {
+                            Allow: true,
+                            Profiles: [{
+                                Name: "Master",
+                                Enabled: true,
+                                AllowChange: true,
+                                Fee: rebuyAmount,
+                                Rake: { "0": 0 },
+                                Chips: chipsPerBuyin,
+                                Points: 0,
+                                BountyChipCost: 0
+                            }],
+                            DefIndex: 0,
+                            LastRound: 10,
+                            MaxPerPlayer: 0,
+                            MaxTotal: 0,
+                            MinPlayers: 0
+                        }
+                    },
+                    Players: playersJSON
+                }
+            };
+
+            document.getElementById('jsonOutput').innerHTML = JSON.stringify(finalJSON, null, 2);
+        }
+
+        function downloadJSONFile() {
+            const jsonStr = document.getElementById('jsonOutput').innerText;
+            if (jsonStr === 'Clique em "GERAR CÓDIGO" para visualizar...') {
+                alert('Por favor, gere o código primeiro clicando em "GERAR CÓDIGO"');
+                return;
+            }
+            
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tournament_data.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function copyToClipboard() {
+            const jsonText = document.getElementById('jsonOutput').innerText;
+            navigator.clipboard.writeText(jsonText).then(() => {
+                alert('Código copiado para a área de transferência!');
+            });
+        }
+
+        function loadSampleData() {
+            players = [
+                { uuid: generateUUID(), nickname: "Eduardo", buyins: 1, rebuys: 8, addons: 1, seatIndex: 3, chipCount: 185000 },
+                { uuid: generateUUID(), nickname: "Felipe", buyins: 1, rebuys: 3, addons: 1, seatIndex: 7, chipCount: 110000 },
+                { uuid: generateUUID(), nickname: "Julinho", buyins: 1, rebuys: 4, addons: 1, seatIndex: 9, chipCount: 125000 },
+                { uuid: generateUUID(), nickname: "Leno", buyins: 1, rebuys: 0, addons: 1, seatIndex: 4, chipCount: 65000 },
+                { uuid: generateUUID(), nickname: "Long", buyins: 1, rebuys: 0, addons: 1, seatIndex: 5, chipCount: 65000 },
+                { uuid: generateUUID(), nickname: "Matheus", buyins: 1, rebuys: 0, addons: 1, seatIndex: 1, chipCount: 65000 },
+                { uuid: generateUUID(), nickname: "Ricardo", buyins: 1, rebuys: 0, addons: 1, seatIndex: 10, chipCount: 65000 },
+                { uuid: generateUUID(), nickname: "Roberto", buyins: 1, rebuys: 0, addons: 1, seatIndex: 6, chipCount: 65000 },
+                { uuid: generateUUID(), nickname: "Sergio", buyins: 1, rebuys: 0, addons: 1, seatIndex: 8, chipCount: 65000 },
+                { uuid: generateUUID(), nickname: "Tigre", buyins: 1, rebuys: 0, addons: 1, seatIndex: 0, chipCount: 65000 }
+            ];
+            renderPlayers();
+            generateJSON();
+        }
+
+        function clearAllPlayers() {
+            if (confirm('Tem certeza que deseja remover todos os jogadores?')) {
+                players = [];
+                renderPlayers();
+                document.getElementById('jsonOutput').innerHTML = 'Clique em "GERAR CÓDIGO" para visualizar...';
+            }
+        }
+
+        // Inicializar com dados de exemplo
+        loadSampleData();
+    </script>
 </body>
 </html>
-```
