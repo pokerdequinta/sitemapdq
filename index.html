@@ -174,7 +174,7 @@
 <body>
     <div class="container">
         <h1>🎰 GERADOR DE CÓDIGO - REBUYS E ADD-ONS 🎰</h1>
-        <div class="subtitle">Importe um CSV com os dados dos jogadores e gere o código completo</div>
+        <div class="subtitle">Importe um CSV com os dados dos jogadores e gere o código completo do torneio</div>
 
         <div class="main-content">
             <div class="import-panel">
@@ -189,9 +189,6 @@
                         📌 Formato: Nome;Rebuys;Addons;UUID (opcional)<br>
                         📌 Se não informar UUID, será gerado automaticamente<br>
                         📌 Separadores suportados: ponto e vírgula (;) ou vírgula (,)
-                    </div>
-                    <div class="csv-example" style="margin-top:5px;">
-                        💡 Dica: Use o botão "Modelo CSV" para baixar um arquivo de exemplo
                     </div>
                     <div>
                         <button class="btn-csv" onclick="importCSV()">📥 IMPORTAR CSV</button>
@@ -220,17 +217,15 @@
     </div>
 
     <script>
-        // Array para armazenar os jogadores importados
         let importedPlayers = [];
 
-        // Template do código base (partes que não mudam)
+        // CÓDIGO BASE COMPLETO (mantém todas as estruturas do torneio)
         function generateFullCode() {
             if (importedPlayers.length === 0) {
                 showStatus("Nenhum jogador importado! Carregue um CSV primeiro.", "error");
                 return;
             }
 
-            // Valores fixos das configurações do torneio
             const BUYIN_FEE = 30;
             const REBUY_FEE = 20;
             const ADDON_FEE = 50;
@@ -246,37 +241,34 @@
             importedPlayers.forEach((player, idx) => {
                 let buyinsArray = [];
                 
-                // Buy-in inicial
                 buyinsArray.push(`new GameBuyin({Time: ${player.buyinTime || BUYIN_TIME}, Round: 1, Amount: ${BUYIN_FEE}, PersonalBounty: 0, Rake: new PerPlayerRake([0]), Chips: ${CHIPS_PER_BUYIN}, Points: 0, ProfileName: "Master"})`);
                 
-                // Rebuys
                 for (let i = 0; i < player.rebuys; i++) {
                     buyinsArray.push(`new GameBuyin({Time: ${REBUY_TIME}, Round: 1, Amount: ${REBUY_FEE}, PersonalBounty: 0, Rake: new PerPlayerRake([0]), Chips: ${CHIPS_PER_BUYIN}, Points: 0, ProfileName: "Master"})`);
                 }
 
-                // AddOns
                 let addonsArray = [];
                 for (let i = 0; i < player.addons; i++) {
                     addonsArray.push(`new GameAddOn({Time: ${ADDON_TIME}, Round: ${ADDON_ROUND}, Amount: ${ADDON_FEE}, Rake: new PerPlayerRake([0]), Chips: ${CHIPS_PER_ADDON}, Points: 0, ProfileName: "Master"})`);
                 }
 
                 const totalChips = CHIPS_PER_BUYIN + (player.rebuys * CHIPS_PER_BUYIN) + (player.addons * CHIPS_PER_ADDON);
-                const lastModified = Date.now() - 100000;
-                const lastModifiedInfo = Date.now() - 99900;
+                const lastModified = player.lastModified || 1776802998912;
+                const lastModifiedInfo = player.lastModifiedInfo || 1776802998916;
 
                 const playerEntry = `["${player.uuid}", new GamePlayer({ UUID: "${player.uuid}", Name: new PlayerName({UUID: "${player.uuid}", Nickname: "${player.nickname}", Firstname: "", Lastname: "", LastModified: ${lastModified}}), Info: new PlayerInfo({UUID: "${player.uuid}", StreetAddress: "", City: "", State: "", Zipcode: "", Country: "", Phone1: "", Phone2: "", Email1: "", Email2: "", Notes: "", LastModified: ${lastModifiedInfo}, OptID: ""}), Buyins: [${buyinsArray.join(', ')}], AddOns: [${addonsArray.join(', ')}], CashAdjustment: 0, PointsAdjustment: 0, ChipCount: ${totalChips}, NumberOfTableMoves: 1, PaidInFull: true, HitsAdjustment: 0 })]`;
                 
                 playersMapEntries.push(playerEntry);
             });
 
-            // Criar seats array baseado na ordem dos jogadores
             const seatsArray = importedPlayers.map(p => `"${p.uuid}"`).join(', ');
             const locksArray = Array(importedPlayers.length).fill('false').join(', ');
 
+            // ========== CÓDIGO COMPLETO DO TORNEIO (MANTENDO TUDO ORIGINAL) ==========
             const fullCode = `{ V: "3.7.2", T: new Tournament({UUID: "1806768e-837c-485a-8e96-f1a12a5286d0", Title: "POKER DE QUARTA", Description: "", Notes: "", Financials: new FinancialConfig({Buyins: new BuyConfig({Allow: false, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 30, Rake: new PerPlayerRake([0]), Chips: 15000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 0, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), AddOns: new BuyConfig({Allow: false, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 50, Rake: new PerPlayerRake([0]), Chips: 50000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 0, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), Rebuys: new BuyConfig({Allow: true, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 20, Rake: new PerPlayerRake([0]), Chips: 15000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 10, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), FixedRake: new FixedRakeConfig({Type: 0, Real: new PerPlayerRake([180]), Percent: new PerPlayerRake([0]), Round: 0, RoundToNearest: 1}), HouseContribution: 0, GuaranteedPot: 0, TotalChipsAdjustment: 0, PointsForHit: 0, PointsForPlaying: new UserFormula({Text: "", Strict: false}), UseBounties: false, RestrictedBounty: true, AllowInTourneyRebuys: true, AllowRebuyOverrideAfterBustout: true}), Players: new GamePlayers({Players: Map.from([${playersMapEntries.join(', ')}]), Chops: new GameChops({Chops: []}), Config: new GamePlayersConfig({TrackPlayers: true, NumberOfEntries: 0, NumberOfPlayers: 0, NumberOfRebuys: 0, NumberOfAddOns: 0, FullCreditHit: false})}), Levels: new GameLevels({Levels: [new GameRound({Minutes: 15, SmallBlind: 100, BigBlind: 200, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [100, 200, 100, 200, 100, 200, 100, 200], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 100, BigBlind: 300, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [200, 400, 200, 400, 200, 400, 200, 400], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 200, BigBlind: 400, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [300, 600, 300, 600, 300, 600, 300, 600], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 300, BigBlind: 600, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [500, 1000, 500, 1000, 500, 1000, 500, 1000], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 400, BigBlind: 800, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [700, 1400, 700, 1400, 700, 1400, 700, 1400], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 500, BigBlind: 1000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [900, 1800, 900, 1800, 900, 1800, 900, 1800], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 600, BigBlind: 1200, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [1100, 2200, 1100, 2200, 1100, 2200, 1100, 2200], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 800, BigBlind: 1600, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [1300, 2600, 1300, 2600, 1300, 2600, 1300, 2600], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 1000, BigBlind: 2000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [1500, 3000, 1500, 3000, 1500, 3000, 1500, 3000], Notes: ""}), new GameRound({Minutes: 15, SmallBlind: 1500, BigBlind: 3000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [1500, 3000, 1500, 3000, 1500, 3000, 1500, 3000], Notes: ""}), new GameBreak({Minutes: 10, Tokens: new TokenOverrides({Tokens: Map.from([])}), ChipUp: false, Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 2000, BigBlind: 4000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [2000, 4000, 2000, 4000, 2000, 4000, 2000, 4000], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 2500, BigBlind: 5000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [2500, 5000, 2500, 5000, 2500, 5000, 2500, 5000], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 3000, BigBlind: 6000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [3000, 6000, 3000, 6000, 3000, 6000, 3000, 6000], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 3500, BigBlind: 7000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [3500, 7000, 3500, 7000, 3500, 7000, 3500, 7000], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 4000, BigBlind: 8000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [4000, 8000, 4000, 8000, 4000, 8000, 4000, 8000], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 4500, BigBlind: 9000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [4500, 9000, 4500, 9000, 4500, 9000, 4500, 9000], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 5000, BigBlind: 10000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [5000, 10000, 5000, 10000, 5000, 10000, 5000, 10000], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 7000, BigBlind: 14000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [4750, 9500, 4750, 9500, 4750, 9500, 4750, 9500], Notes: ""}), new GameRound({Minutes: 12, SmallBlind: 10000, BigBlind: 20000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [9500, 19000, 9500, 19000, 9500, 19000, 9500, 19000], Notes: ""}), new GameRound({Minutes: 10, SmallBlind: 15000, BigBlind: 30000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [19000, 38000, 19000, 38000, 19000, 38000, 19000, 38000], Notes: ""}), new GameRound({Minutes: 10, SmallBlind: 30000, BigBlind: 60000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [38000, 76000, 38000, 76000, 38000, 76000, 38000, 76000], Notes: ""}), new GameRound({Minutes: 10, SmallBlind: 60000, BigBlind: 120000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [76000, 152000, 76000, 152000, 76000, 152000, 76000, 152000], Notes: ""}), new GameRound({Minutes: 10, SmallBlind: 120000, BigBlind: 240000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [152000, 304000, 152000, 304000, 152000, 304000, 152000, 304000], Notes: ""}), new GameRound({Minutes: 10, SmallBlind: 240000, BigBlind: 480000, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [304000, 608000, 304000, 608000, 304000, 608000, 304000, 608000], Notes: ""})]}), Prizes: new GamePrizes({Prizes: [new GamePrize({Description: "1 Lugar", Type: 0, Recipient: 1, AmountType: 0, Amount: 46, Adjustment: 0, ShareRemainder: true, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 70, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "2 Lugar", Type: 0, Recipient: 2, AmountType: 0, Amount: 27, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 40, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "3 Lugar", Type: 0, Recipient: 3, AmountType: 0, Amount: 17, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 30, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "4 Lugar", Type: 0, Recipient: 4, AmountType: 0, Amount: 10, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 20, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false})], RoundPrizes: 2, RoundToNearest: 10, EstimatedPotInfo: new EstimatedPotData({UseEstimatedPot: false, EstimatedPot: 0, CalculateEstimatedPot: false, NumberOfBuyins: 0, NumberOfRebuys: 0, NumberOfAddOns: 0, CalculatedPot: 0, ShowEstimatedPot: false}), Automatic: false, AutomaticAtTop: true}), Chips: new GameChips({Chips: [new GameChip({ChipID: "1", Label: "White", ImagePath: "images\\\\chip_white.gif", Value: 100, Use: true, PerPlayer: 0}), new GameChip({ChipID: "2", Label: "Red", ImagePath: "images\\\\chip_red.gif", Value: 500, Use: true, PerPlayer: 0}), new GameChip({ChipID: "3", Label: "Blue", ImagePath: "images\\\\chip_blue.gif", Value: 1000, Use: true, PerPlayer: 0}), new GameChip({ChipID: "4", Label: "Black", ImagePath: "images\\\\chip_black.gif", Value: 5000, Use: true, PerPlayer: 0})], ChipSets: [new ChipSet({Name: "Main Set", ChipCounts: Map.from([["1", 120], ["2", 180], ["3", 120], ["4", 80]])}), new ChipSet({Name: "Set 2", ChipCounts: Map.from([["1", 120], ["2", 180], ["3", 120], ["4", 80]])}), new ChipSet({Name: "Set 3", ChipCounts: Map.from([["1", 400], ["2", 100], ["3", 0], ["4", 0]])})]}), Tables: new GameTables({AutoSuggestMovements: true, MaxPlayerDisparity: 1, Tables: [new GameTable({Name: "MESA 1", NumberOfSeats: ${importedPlayers.length}, Seats: [${seatsArray}], Locks: [${locksArray}], DealerButtonSeat: 0, UUID: "dfc69d93-a845-4e62-8fe2-0b058ff7e144"})], BalanceAlgorithm: 0, RandomizeFinalTable: true, LastPlayerMove: new PlayerMovement({Time: 1776803079458, Moves: []}), UnavailableSeats: Map.from([]), CollapseFirstTables: [], CollapseLastTables: [], CollapseFirstInOrder: false, CollapseLastInOrder: false, SeatPlayersCloseToHome: false, CanSeatUnpaidPlayers: false, AutoAcceptMovementSuggestions: false}), History: new GameHistory({History: []}), StartTime: 1776778018114, CurrentPeriodDuration: 900, AccumulatedSeconds: 0, ClockRunning: false, Countdown: 0, CountdownSeconds: 0, CountdownTime: 0, CurrentLevel: 0, Events: new GameEvents({Sounds: [new Sound({Name: "clock", Path: "sounds\\\\clockSound.wav"}), new Sound({Name: "warning", Path: "sounds\\\\warningSound.wav"}), new Sound({Name: "final", Path: "sounds\\\\finalSound.wav"}), new Sound({Name: "handTimer", Path: "sounds\\\\handTimer.wav"})], Events: [new GameEvent({Description: "Clock is paused", Trigger: 1, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "clock"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Clock is unpaused", Trigger: 2, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "clock"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Level end warning", Trigger: 0, Conditions: new UserFormula({Text: "(secondsLeft = 60) or (secondsLeft = 3) or (secondsLeft = 2) or (secondsLeft = 1)", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "warning"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Level end", Trigger: 6, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "final"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Hand Timer expires", Trigger: 18, Conditions: new UserFormula({Text: "handTimerSecondsLeft = 0", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "handTimer"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "The Countdown ends", Trigger: 0, Conditions: new UserFormula({Text: "(state = 1) and (secondsLeft = 0)", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "final"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0})], MsgPropSets: Map.from([]), DefMsgDuration: 7}), LastModified: 0, Rules: new GameRules({Tokens: new TokenOverrides({Tokens: Map.from([])})})}), L: { V: "3.7.2", L: new LO.Layout({ScreenBox: new LO.ScreenBox({Contents: Map.from([])}), ScreenSets: new LO.ScreenSets({Sets: []}), GlobalProps: new LO.GlobalProps({Contents: Map.from([])}), CellBox: new LO.CellBox({Contents: Map.from([])}), BannerSets: new LO.BannerSets({Contents: Map.from([])}), OtherProps: new LO.OtherProps({Properties: Map.from([])}), Tokens: new TokenOverrides({Tokens: Map.from([])}), Settings: new LO.LayoutSettings({OptimalRes: new Dimension({Width: 1024, Height: 768})})}) } }`;
 
             document.getElementById('codeOutput').innerText = fullCode;
-            showStatus(`✅ Código gerado com sucesso! ${importedPlayers.length} jogadores processados.`, "success");
+            showStatus(`✅ Código completo gerado! ${importedPlayers.length} jogadores processados.`, "success");
         }
 
         function generateUUID() {
@@ -297,7 +289,6 @@
             const lines = csvText.trim().split(/\r?\n/);
             const players = [];
             
-            // Detecta separador
             let separator = ';';
             if (lines[0] && lines[0].includes(',')) separator = ',';
 
@@ -305,10 +296,7 @@
                 if (!line.trim()) continue;
                 
                 const parts = line.split(separator);
-                if (parts.length < 3) {
-                    showStatus(`Linha ignorada (formato inválido): ${line}`, "error");
-                    continue;
-                }
+                if (parts.length < 3) continue;
                 
                 const nickname = parts[0].trim();
                 const rebuys = parseInt(parts[1]) || 0;
@@ -325,7 +313,9 @@
                         nickname: nickname,
                         rebuys: rebuys,
                         addons: addons,
-                        buyinTime: 1776803009249
+                        buyinTime: 1776803009249,
+                        lastModified: 1776802998912,
+                        lastModifiedInfo: 1776802998916
                     });
                 }
             }
@@ -336,10 +326,9 @@
             }
 
             importedPlayers = players;
-            showStatus(`✅ ${players.length} jogadores importados com sucesso!`, "success");
+            showStatus(`✅ ${players.length} jogadores importados!`, "success");
             displayPreview();
             
-            // Habilitar botões
             document.getElementById('generateBtn').disabled = false;
             document.getElementById('copyBtn').disabled = false;
         }
@@ -366,18 +355,18 @@
 
         function downloadCSVTemplate() {
             let csvContent = "Nome;Rebuys;Addons;UUID\n";
-            csvContent += "Eduardo;0;0;\n";
-            csvContent += "Felipe;0;0;\n";
-            csvContent += "Julinho;0;0;\n";
-            csvContent += "Leno;0;0;\n";
-            csvContent += "Long;0;0;\n";
-            csvContent += "Matheus;0;0;\n";
-            csvContent += "Ricardo;0;0;\n";
-            csvContent += "Roberto;0;0;\n";
-            csvContent += "Sergio;0;0;\n";
-            csvContent += "Tigre;0;0;\n";
-            csvContent += "Andre;0;0;\n";
-            csvContent += "Gregory;0;0;";
+            csvContent += "Eduardo;0;0;d6a2925b-e405-4532-806a-a2481de59f43\n";
+            csvContent += "Felipe;0;0;4bddb52c-6a7f-43b9-a4ac-6f7e560c172a\n";
+            csvContent += "Julinho;0;0;ebb484c0-d0c1-4ec9-8066-8f2a7dd5d394\n";
+            csvContent += "Leno;0;0;65e3fe0d-ffe8-48e0-a2bb-b938b1583c96\n";
+            csvContent += "Long;0;0;fa41f9f6-4389-4cab-a70b-0c2e576bf593\n";
+            csvContent += "Matheus;0;0;76ab831b-2dd9-4c6d-8e5d-3419e532454a\n";
+            csvContent += "Ricardo;0;0;4d80120c-201e-4d2e-bde8-b17be08a6a8c\n";
+            csvContent += "Roberto;0;0;8665b998-25c3-45d1-83ae-290b0f28f9a0\n";
+            csvContent += "Sergio;0;0;38b39c66-f546-4471-ad38-5599a99cf105\n";
+            csvContent += "Tigre;0;0;c77d6f73-3582-4433-942d-4836cce86101\n";
+            csvContent += "Andre;0;0;2fc127c1-694e-424c-9e12-887ea0a5b6ae\n";
+            csvContent += "Gregory;0;0;1935c2e2-84b8-434f-bbdd-c3bf290139ba";
             
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -422,9 +411,9 @@ Gregory;0;0;1935c2e2-84b8-434f-bbdd-c3bf290139ba`;
             const code = document.getElementById('codeOutput').innerText;
             if (code && code !== 'Importe um CSV para gerar o código...') {
                 navigator.clipboard.writeText(code);
-                showStatus("📋 Código copiado para a área de transferência!", "success");
+                showStatus("📋 Código copiado!", "success");
             } else {
-                showStatus("Nenhum código gerado para copiar!", "error");
+                showStatus("Nenhum código gerado!", "error");
             }
         }
 
