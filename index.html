@@ -150,9 +150,10 @@
             border-left: 3px solid #ffd700;
         }
 
-        .player-card.organizacao {
-            border-left-color: #00ff00;
-            background: rgba(0,255,0,0.1);
+        .player-card.best-hand {
+            border-left-color: #ff00ff;
+            background: rgba(255,0,255,0.15);
+            box-shadow: 0 0 10px rgba(255,0,255,0.3);
         }
 
         .player-card:hover {
@@ -164,6 +165,10 @@
             color: #ffd700;
             font-size: 1em;
             margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
         }
 
         .player-name .profile-badge {
@@ -175,8 +180,45 @@
             margin-left: 10px;
         }
 
-        .player-name .profile-badge.organizacao {
-            background: #00ff00;
+        .player-name .profile-badge.best-hand {
+            background: #ff00ff;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .best-hand-selector {
+            background: rgba(255,0,255,0.2);
+            border: 1px solid #ff00ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .best-hand-selector label {
+            color: #ff00ff;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .best-hand-selector select {
+            width: 100%;
+            padding: 10px;
+            background: #0a0a0a;
+            border: 1px solid #ff00ff;
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .best-hand-selector select option {
+            background: #1a1a2e;
         }
 
         .player-controls {
@@ -231,10 +273,6 @@
             padding: 5px 12px;
             border-radius: 6px;
             font-weight: bold;
-        }
-
-        .total-value.zero-addon {
-            color: #ffd700;
         }
 
         pre {
@@ -348,6 +386,15 @@
 
                 <div id="status" class="status"></div>
 
+                <div class="card-title" style="margin-top:20px;">🏆 MELHOR MÃO</div>
+                <div class="best-hand-selector" id="bestHandSelector" style="display: none;">
+                    <label>🎯 Selecione o ganhador da Melhor Mão (Add-on Grátis):</label>
+                    <select id="bestHandPlayer" onchange="updateBestHand()">
+                        <option value="">Nenhum (selecionar)</option>
+                    </select>
+                    <p style="font-size: 11px; color: #ff00ff; margin-top: 8px;">⚠️ O jogador selecionado terá TODOS os add-ons com valor ZERO!</p>
+                </div>
+
                 <div class="card-title" style="margin-top:20px;">👥 JOGADORES</div>
                 <div id="previewList" class="players-list">
                     <div style="text-align:center; color:#888; padding:40px;">Nenhum dado importado</div>
@@ -367,6 +414,7 @@
 
     <script>
         let importedPlayers = [];
+        let bestHandPlayerUUID = null;
 
         const BUYIN_FEE = 100;
         const REBUY_FEE = 30;
@@ -379,14 +427,14 @@
         const REBUY_TIME = 1776803010000;
         const ADDON_TIME = 1776803020000;
 
-        // Lista de jogadores que devem ter o ADD-ON zerado
+        // Lista de jogadores da organização (add-on grátis, mas SEM destaque visual)
         const ORGANIZACAO_PLAYERS = ['Gaspar', 'Matheus', 'Ricardo Linhares', 'Diego'];
 
         const ONLINE_DATA_URL = 'https://pokerdequinta.github.io/siteversao2/';
 
-        const BASE_TEMPLATE = `{ V: "3.7.2", T: new Tournament({UUID: "1806768e-837c-485a-8e96-f1a12a5286d0", Title: "Poker de Quinta Temporada 2026", Description: "", Notes: "", Financials: new FinancialConfig({Buyins: new BuyConfig({Allow: false, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 100, Rake: new PerPlayerRake([0]), Chips: 15000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 0, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), AddOns: new BuyConfig({Allow: true, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 50, Rake: new PerPlayerRake([0]), Chips: 50000, Points: 0, BountyChipCost: 0}), new FeeProfile({Name: "ORGANIZACAO", Enabled: true, AllowChange: true, Fee: 0, Rake: new PerPlayerRake([0]), Chips: 50000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 0, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), Rebuys: new BuyConfig({Allow: true, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 30, Rake: new PerPlayerRake([0]), Chips: 15000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 10, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), FixedRake: new FixedRakeConfig({Type: 0, Real: new PerPlayerRake([0]), Percent: new PerPlayerRake([0]), Round: 0, RoundToNearest: 1}), HouseContribution: 0, GuaranteedPot: 0, TotalChipsAdjustment: 0, PointsForHit: 0, PointsForPlaying: new UserFormula({Text: "", Strict: false}), UseBounties: false, RestrictedBounty: true, AllowInTourneyRebuys: true, AllowRebuyOverrideAfterBustout: true}), Players: new GamePlayers({Players: Map.from([PLAYERS_PLACEHOLDER]), Chops: new GameChops({Chops: []}), Config: new GamePlayersConfig({TrackPlayers: true, NumberOfEntries: 0, NumberOfPlayers: 0, NumberOfRebuys: 0, NumberOfAddOns: 0, FullCreditHit: false})}), Levels: new GameLevels({Levels: [new GameRound({Minutes: 15, SmallBlind: 100, BigBlind: 200, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [100, 200, 100, 200, 100, 200, 100, 200], Notes: ""})]}), Prizes: new GamePrizes({Prizes: [new GamePrize({Description: "1 Lugar", Type: 0, Recipient: 1, AmountType: 0, Amount: 46, Adjustment: 0, ShareRemainder: true, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 0, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "2 Lugar", Type: 0, Recipient: 2, AmountType: 0, Amount: 27, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 0, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "3 Lugar", Type: 0, Recipient: 3, AmountType: 0, Amount: 17, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 0, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "4 Lugar", Type: 0, Recipient: 4, AmountType: 0, Amount: 10, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 0, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false})], RoundPrizes: 2, RoundToNearest: 10, EstimatedPotInfo: new EstimatedPotData({UseEstimatedPot: false, EstimatedPot: 0, CalculateEstimatedPot: false, NumberOfBuyins: 0, NumberOfRebuys: 0, NumberOfAddOns: 0, CalculatedPot: 0, ShowEstimatedPot: false}), Automatic: false, AutomaticAtTop: true}), Chips: new GameChips({Chips: [new GameChip({ChipID: "1", Label: "White", ImagePath: "images\\\\chip_white.gif", Value: 100, Use: true, PerPlayer: 0}), new GameChip({ChipID: "2", Label: "Red", ImagePath: "images\\\\chip_red.gif", Value: 500, Use: true, PerPlayer: 0}), new GameChip({ChipID: "3", Label: "Blue", ImagePath: "images\\\\chip_blue.gif", Value: 1000, Use: true, PerPlayer: 0}), new GameChip({ChipID: "4", Label: "Black", ImagePath: "images\\\\chip_black.gif", Value: 5000, Use: true, PerPlayer: 0})], ChipSets: [new ChipSet({Name: "Main Set", ChipCounts: Map.from([["1", 120], ["2", 180], ["3", 120], ["4", 80]])}), new ChipSet({Name: "Set 2", ChipCounts: Map.from([["1", 120], ["2", 180], ["3", 120], ["4", 80]])}), new ChipSet({Name: "Set 3", ChipCounts: Map.from([["1", 400], ["2", 100], ["3", 0], ["4", 0]])})]}), Tables: new GameTables({AutoSuggestMovements: true, MaxPlayerDisparity: 1, Tables: [new GameTable({Name: "MESA PRETA", NumberOfSeats: SEATS_PLACEHOLDER, Seats: [SEATS_ARRAY_PLACEHOLDER], Locks: [LOCKS_ARRAY_PLACEHOLDER], DealerButtonSeat: 0, UUID: "dfc69d93-a845-4e62-8fe2-0b058ff7e144"})], BalanceAlgorithm: 0, RandomizeFinalTable: true, LastPlayerMove: new PlayerMovement({Time: 1776803079458, Moves: []}), UnavailableSeats: Map.from([]), CollapseFirstTables: [], CollapseLastTables: [], CollapseFirstInOrder: false, CollapseLastInOrder: false, SeatPlayersCloseToHome: false, CanSeatUnpaidPlayers: false, AutoAcceptMovementSuggestions: false}), History: new GameHistory({History: []}), StartTime: 1776778018114, EndTime: 1777081306713, CurrentPeriodDuration: 900, AccumulatedSeconds: 0, ClockRunning: false, Countdown: 0, CountdownSeconds: 0, CountdownTime: 0, CurrentLevel: 0, Events: new GameEvents({Sounds: [new Sound({Name: "clock", Path: "sounds\\\\clockSound.wav"}), new Sound({Name: "warning", Path: "sounds\\\\warningSound.wav"}), new Sound({Name: "final", Path: "sounds\\\\finalSound.wav"}), new Sound({Name: "handTimer", Path: "sounds\\\\handTimer.wav"})], Events: [new GameEvent({Description: "Clock is paused", Trigger: 1, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "clock"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Clock is unpaused", Trigger: 2, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "clock"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Level end warning", Trigger: 0, Conditions: new UserFormula({Text: "(secondsLeft = 60) or (secondsLeft = 3) or (secondsLeft = 2) or (secondsLeft = 1)", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "warning"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Level end", Trigger: 6, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "final"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Hand Timer expires", Trigger: 18, Conditions: new UserFormula({Text: "handTimerSecondsLeft = 0", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "handTimer"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "The Countdown ends", Trigger: 0, Conditions: new UserFormula({Text: "(state = 1) and (secondsLeft = 0)", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "final"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0})], MsgPropSets: Map.from([]), DefMsgDuration: 7}), LastModified: 0, Rules: new GameRules({Tokens: new TokenOverrides({Tokens: Map.from([])})})}), L: { V: "3.7.2", L: new LO.Layout({ScreenBox: new LO.ScreenBox({Contents: Map.from([])}), ScreenSets: new LO.ScreenSets({Sets: []}), GlobalProps: new LO.GlobalProps({Contents: Map.from([])}), CellBox: new LO.CellBox({Contents: Map.from([])}), BannerSets: new LO.BannerSets({Contents: Map.from([])}), OtherProps: new LO.OtherProps({Properties: Map.from([])}), Tokens: new TokenOverrides({Tokens: Map.from([])}), Settings: new LO.LayoutSettings({OptimalRes: new Dimension({Width: 1024, Height: 768})})}) } }`;
+        const BASE_TEMPLATE = `{ V: "3.7.2", T: new Tournament({UUID: "1806768e-837c-485a-8e96-f1a12a5286d0", Title: "Poker de Quinta Temporada 2026", Description: "", Notes: "", Financials: new FinancialConfig({Buyins: new BuyConfig({Allow: false, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 100, Rake: new PerPlayerRake([0]), Chips: 15000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 0, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), AddOns: new BuyConfig({Allow: true, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 50, Rake: new PerPlayerRake([0]), Chips: 50000, Points: 0, BountyChipCost: 0}), new FeeProfile({Name: "ORGANIZACAO", Enabled: true, AllowChange: true, Fee: 0, Rake: new PerPlayerRake([0]), Chips: 50000, Points: 0, BountyChipCost: 0}), new FeeProfile({Name: "MELHOR_MAO", Enabled: true, AllowChange: true, Fee: 0, Rake: new PerPlayerRake([0]), Chips: 50000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 0, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), Rebuys: new BuyConfig({Allow: true, Profiles: [new FeeProfile({Name: "Master", Enabled: true, AllowChange: true, Fee: 30, Rake: new PerPlayerRake([0]), Chips: 15000, Points: 0, BountyChipCost: 0})], DefIndex: 0, LastRound: 10, MaxPerPlayer: 0, MaxTotal: 0, MinPlayers: 0}), FixedRake: new FixedRakeConfig({Type: 0, Real: new PerPlayerRake([0]), Percent: new PerPlayerRake([0]), Round: 0, RoundToNearest: 1}), HouseContribution: 0, GuaranteedPot: 0, TotalChipsAdjustment: 0, PointsForHit: 0, PointsForPlaying: new UserFormula({Text: "", Strict: false}), UseBounties: false, RestrictedBounty: true, AllowInTourneyRebuys: true, AllowRebuyOverrideAfterBustout: true}), Players: new GamePlayers({Players: Map.from([PLAYERS_PLACEHOLDER]), Chops: new GameChops({Chops: []}), Config: new GamePlayersConfig({TrackPlayers: true, NumberOfEntries: 0, NumberOfPlayers: 0, NumberOfRebuys: 0, NumberOfAddOns: 0, FullCreditHit: false})}), Levels: new GameLevels({Levels: [new GameRound({Minutes: 15, SmallBlind: 100, BigBlind: 200, Ante: 0, GameType: 2, GameName: "Texas Hold 'Em", Tokens: new TokenOverrides({Tokens: Map.from([])}), Limits: [100, 200, 100, 200, 100, 200, 100, 200], Notes: ""})]}), Prizes: new GamePrizes({Prizes: [new GamePrize({Description: "1 Lugar", Type: 0, Recipient: 1, AmountType: 0, Amount: 46, Adjustment: 0, ShareRemainder: true, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 0, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "2 Lugar", Type: 0, Recipient: 2, AmountType: 0, Amount: 27, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 0, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "3 Lugar", Type: 0, Recipient: 3, AmountType: 0, Amount: 17, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 0, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false}), new GamePrize({Description: "4 Lugar", Type: 0, Recipient: 4, AmountType: 0, Amount: 10, Adjustment: 0, ShareRemainder: false, Points: 0, AwardedToPlayers: [], SharedRemainder: 0, CalculatedAmount: 0, CalculatedPoints: 0, EstimatedAmount: 0, EstimatedSharedRemainder: 0, Display: true, Lock: false})], RoundPrizes: 2, RoundToNearest: 10, EstimatedPotInfo: new EstimatedPotData({UseEstimatedPot: false, EstimatedPot: 0, CalculateEstimatedPot: false, NumberOfBuyins: 0, NumberOfRebuys: 0, NumberOfAddOns: 0, CalculatedPot: 0, ShowEstimatedPot: false}), Automatic: false, AutomaticAtTop: true}), Chips: new GameChips({Chips: [new GameChip({ChipID: "1", Label: "White", ImagePath: "images\\\\chip_white.gif", Value: 100, Use: true, PerPlayer: 0}), new GameChip({ChipID: "2", Label: "Red", ImagePath: "images\\\\chip_red.gif", Value: 500, Use: true, PerPlayer: 0}), new GameChip({ChipID: "3", Label: "Blue", ImagePath: "images\\\\chip_blue.gif", Value: 1000, Use: true, PerPlayer: 0}), new GameChip({ChipID: "4", Label: "Black", ImagePath: "images\\\\chip_black.gif", Value: 5000, Use: true, PerPlayer: 0})], ChipSets: [new ChipSet({Name: "Main Set", ChipCounts: Map.from([["1", 120], ["2", 180], ["3", 120], ["4", 80]])}), new ChipSet({Name: "Set 2", ChipCounts: Map.from([["1", 120], ["2", 180], ["3", 120], ["4", 80]])}), new ChipSet({Name: "Set 3", ChipCounts: Map.from([["1", 400], ["2", 100], ["3", 0], ["4", 0]])})]}), Tables: new GameTables({AutoSuggestMovements: true, MaxPlayerDisparity: 1, Tables: [new GameTable({Name: "MESA PRETA", NumberOfSeats: SEATS_PLACEHOLDER, Seats: [SEATS_ARRAY_PLACEHOLDER], Locks: [LOCKS_ARRAY_PLACEHOLDER], DealerButtonSeat: 0, UUID: "dfc69d93-a845-4e62-8fe2-0b058ff7e144"})], BalanceAlgorithm: 0, RandomizeFinalTable: true, LastPlayerMove: new PlayerMovement({Time: 1776803079458, Moves: []}), UnavailableSeats: Map.from([]), CollapseFirstTables: [], CollapseLastTables: [], CollapseFirstInOrder: false, CollapseLastInOrder: false, SeatPlayersCloseToHome: false, CanSeatUnpaidPlayers: false, AutoAcceptMovementSuggestions: false}), History: new GameHistory({History: []}), StartTime: 1776778018114, EndTime: 1777081306713, CurrentPeriodDuration: 900, AccumulatedSeconds: 0, ClockRunning: false, Countdown: 0, CountdownSeconds: 0, CountdownTime: 0, CurrentLevel: 0, Events: new GameEvents({Sounds: [new Sound({Name: "clock", Path: "sounds\\\\clockSound.wav"}), new Sound({Name: "warning", Path: "sounds\\\\warningSound.wav"}), new Sound({Name: "final", Path: "sounds\\\\finalSound.wav"}), new Sound({Name: "handTimer", Path: "sounds\\\\handTimer.wav"})], Events: [new GameEvent({Description: "Clock is paused", Trigger: 1, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "clock"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Clock is unpaused", Trigger: 2, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "clock"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Level end warning", Trigger: 0, Conditions: new UserFormula({Text: "(secondsLeft = 60) or (secondsLeft = 3) or (secondsLeft = 2) or (secondsLeft = 1)", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "warning"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Level end", Trigger: 6, Conditions: new UserFormula({Text: "", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "final"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "Hand Timer expires", Trigger: 18, Conditions: new UserFormula({Text: "handTimerSecondsLeft = 0", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "handTimer"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0}), new GameEvent({Description: "The Countdown ends", Trigger: 0, Conditions: new UserFormula({Text: "(state = 1) and (secondsLeft = 0)", Strict: false}), Actions: [new GameEventAction({Type: 0, Data: new DO({Sound: "final"})})], Omit: false, SoundsBehavior: 0, MessagesBehavior: 0, SoundsPriority: 0, MessagesPriority: 0})], MsgPropSets: Map.from([]), DefMsgDuration: 7}), LastModified: 0, Rules: new GameRules({Tokens: new TokenOverrides({Tokens: Map.from([])})})}), L: { V: "3.7.2", L: new LO.Layout({ScreenBox: new LO.ScreenBox({Contents: Map.from([])}), ScreenSets: new LO.ScreenSets({Sets: []}), GlobalProps: new LO.GlobalProps({Contents: Map.from([])}), CellBox: new LO.CellBox({Contents: Map.from([])}), BannerSets: new LO.BannerSets({Contents: Map.from([])}), OtherProps: new LO.OtherProps({Properties: Map.from([])}), Tokens: new TokenOverrides({Tokens: Map.from([])}), Settings: new LO.LayoutSettings({OptimalRes: new Dimension({Width: 1024, Height: 768})})}) } }`;
 
-        // Função para verificar se o jogador deve ter o add-on zerado
+        // Função para verificar se o jogador é da organização (add-on grátis, sem destaque)
         function isOrganizacaoPlayer(playerName) {
             return ORGANIZACAO_PLAYERS.some(name => playerName.toLowerCase() === name.toLowerCase());
         }
@@ -399,18 +447,44 @@
             });
         }
 
+        function updateBestHand() {
+            const select = document.getElementById('bestHandPlayer');
+            bestHandPlayerUUID = select.value || null;
+            displayPreview();
+        }
+
+        function populateBestHandSelector() {
+            const select = document.getElementById('bestHandPlayer');
+            select.innerHTML = '<option value="">Nenhum (selecionar)</option>';
+            
+            importedPlayers.forEach(player => {
+                const option = document.createElement('option');
+                option.value = player.uuid;
+                option.textContent = player.nickname;
+                if (bestHandPlayerUUID === player.uuid) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
         function displayPreview() {
             const container = document.getElementById('previewList');
             if (importedPlayers.length === 0) {
                 container.innerHTML = '<div style="text-align:center; color:#888; padding:40px;">Nenhum dado importado</div>';
+                document.getElementById('bestHandSelector').style.display = 'none';
                 return;
             }
+
+            document.getElementById('bestHandSelector').style.display = 'block';
 
             let totalEntries = importedPlayers.length;
             let totalRebuys = importedPlayers.reduce((sum, p) => sum + p.rebuys, 0);
             let totalAddons = importedPlayers.reduce((sum, p) => sum + p.addons, 0);
             let totalAmountReal = importedPlayers.reduce((sum, p) => {
-                const addonValue = p.zeroAddon ? ADDON_FEE_ZERO : ADDON_FEE_NORMAL;
+                // Add-on grátis para: jogadores da organização OU ganhador da melhor mão
+                const hasFreeAddon = p.isOrganizacao || (bestHandPlayerUUID === p.uuid);
+                const addonValue = hasFreeAddon ? ADDON_FEE_ZERO : ADDON_FEE_NORMAL;
                 return sum + BUYIN_FEE + (p.rebuys * REBUY_FEE) + (p.addons * addonValue);
             }, 0);
 
@@ -419,14 +493,15 @@
                     📊 <span>${totalEntries}</span> Jogadores | 🔁 <span>${totalRebuys}</span> Rebuys | 💰 <span>${totalAddons}</span> Add-ons | 💵 TOTAL ARRECADADO: R$ <span>${totalAmountReal}</span>
                 </div>
                 ${importedPlayers.map(p => {
-                    const addonValue = p.zeroAddon ? ADDON_FEE_ZERO : ADDON_FEE_NORMAL;
+                    const isBestHand = (bestHandPlayerUUID === p.uuid);
+                    const hasFreeAddon = p.isOrganizacao || isBestHand;
+                    const addonValue = hasFreeAddon ? ADDON_FEE_ZERO : ADDON_FEE_NORMAL;
                     const totalAmount = BUYIN_FEE + (p.rebuys * REBUY_FEE) + (p.addons * addonValue);
-                    const isOrg = p.zeroAddon;
                     return `
-                    <div class="player-card ${isOrg ? 'organizacao' : ''}">
+                    <div class="player-card ${isBestHand ? 'best-hand' : ''}">
                         <div class="player-name">
                             ${p.nickname}
-                            <span class="profile-badge ${isOrg ? 'organizacao' : ''}">${isOrg ? 'ADD-ON GRÁTIS' : 'Master'}</span>
+                            ${isBestHand ? '<span class="profile-badge best-hand">🏆 MELHOR MÃO 🏆</span>' : ''}
                         </div>
                         <div class="player-controls">
                             <div class="control-group">
@@ -436,14 +511,13 @@
                                 <button onclick="updateRebuys('${p.uuid}', 1)">+</button>
                             </div>
                             <div class="control-group">
-                                <label>💰 Add-ons ${isOrg ? '(GRÁTIS)' : `(R$${ADDON_FEE_NORMAL})`}:</label>
+                                <label>💰 Add-ons (R$${ADDON_FEE_NORMAL}):</label>
                                 <button class="minus" onclick="updateAddons('${p.uuid}', -1)">-</button>
                                 <span id="addon-${p.uuid}">${p.addons}</span>
                                 <button onclick="updateAddons('${p.uuid}', 1)">+</button>
                             </div>
                             <div class="total-value">
                                 💰 TOTAL: R$ ${totalAmount}
-                                ${isOrg && p.addons > 0 ? ` (Add-ons grátis: ${p.addons} x R$0)` : ''}
                             </div>
                         </div>
                     </div>
@@ -491,16 +565,13 @@
                 
                 if (!uuid || uuid === '') uuid = generateUUID();
                 
-                // Verifica se o jogador deve ter add-on zerado
-                const zeroAddon = isOrganizacaoPlayer(nickname);
-                
                 if (nickname) {
                     players.push({
                         uuid: uuid,
                         nickname: nickname,
                         rebuys: rebuys,
                         addons: addons,
-                        zeroAddon: zeroAddon,
+                        isOrganizacao: isOrganizacaoPlayer(nickname),
                         buyinTime: BUYIN_TIME,
                         lastModified: 1776802998912,
                         lastModifiedInfo: 1776802998916
@@ -514,7 +585,9 @@
             }
 
             importedPlayers = players;
-            showStatus(`✅ ${players.length} jogadores importados!`, "success");
+            bestHandPlayerUUID = null;
+            populateBestHandSelector();
+            showStatus(`✅ ${players.length} jogadores importados! (Jogadores da organização: ${importedPlayers.filter(p => p.isOrganizacao).map(p => p.nickname).join(', ') || 'nenhum'})`, "success");
             displayPreview();
             
             document.getElementById('generateBtn').disabled = false;
@@ -547,10 +620,12 @@
         function clearCSV() {
             document.getElementById('csvInput').value = '';
             importedPlayers = [];
+            bestHandPlayerUUID = null;
             document.getElementById('previewList').innerHTML = '<div style="text-align:center; color:#888; padding:40px;">Nenhum dado importado</div>';
             document.getElementById('codeOutput').innerText = 'Importe um CSV para gerar o código...';
             document.getElementById('generateBtn').disabled = true;
             document.getElementById('copyBtn').disabled = true;
+            document.getElementById('bestHandSelector').style.display = 'none';
             showStatus("Dados limpos!", "success");
         }
 
@@ -563,8 +638,17 @@
             let playersMapEntries = [];
 
             importedPlayers.forEach((player) => {
-                // Define o perfil do add-on baseado se o jogador tem add-on zerado
-                const addonProfile = player.zeroAddon ? 'ORGANIZACAO' : 'Master';
+                // Define o perfil do add-on:
+                // - Jogadores da organização: perfil ORGANIZACAO (R$0)
+                // - Ganhador da melhor mão: perfil MELHOR_MAO (R$0)
+                // - Demais: perfil Master (R$50)
+                let addonProfile = 'Master';
+                if (player.isOrganizacao) {
+                    addonProfile = 'ORGANIZACAO';
+                } else if (bestHandPlayerUUID === player.uuid) {
+                    addonProfile = 'MELHOR_MAO';
+                }
+                
                 // Buy-in e rebuy sempre usam o perfil Master (valores normais)
                 const buyinProfile = 'Master';
                 const rebuyProfile = 'Master';
@@ -577,7 +661,8 @@
                 }
 
                 let addonsArray = [];
-                const addonFee = player.zeroAddon ? ADDON_FEE_ZERO : ADDON_FEE_NORMAL;
+                // Valor do add-on: 0 para organização e melhor mão, 50 para os demais
+                const addonFee = (player.isOrganizacao || (bestHandPlayerUUID === player.uuid)) ? ADDON_FEE_ZERO : ADDON_FEE_NORMAL;
                 for (let i = 0; i < player.addons; i++) {
                     addonsArray.push(`new GameAddOn({Time: ${ADDON_TIME}, Round: ${ADDON_ROUND}, Amount: ${addonFee}, Rake: new PerPlayerRake([0]), Chips: ${CHIPS_PER_ADDON}, Points: 0, ProfileName: "${addonProfile}"})`);
                 }
@@ -608,14 +693,16 @@
             const totalBuyinsReal = importedPlayers.length * BUYIN_FEE;
             const totalRebuysReal = importedPlayers.reduce((sum, p) => sum + (p.rebuys * REBUY_FEE), 0);
             const totalAddonsReal = importedPlayers.reduce((sum, p) => {
-                const addonFee = p.zeroAddon ? ADDON_FEE_ZERO : ADDON_FEE_NORMAL;
+                const hasFreeAddon = p.isOrganizacao || (bestHandPlayerUUID === p.uuid);
+                const addonFee = hasFreeAddon ? ADDON_FEE_ZERO : ADDON_FEE_NORMAL;
                 return sum + (p.addons * addonFee);
             }, 0);
             const totalAmountReal = totalBuyinsReal + totalRebuysReal + totalAddonsReal;
             
-            const orgPlayers = importedPlayers.filter(p => p.zeroAddon).map(p => p.nickname).join(', ');
+            const bestHandPlayer = importedPlayers.find(p => p.uuid === bestHandPlayerUUID);
+            const organizacaoPlayers = importedPlayers.filter(p => p.isOrganizacao).map(p => p.nickname).join(', ');
             
-            showStatus(`✅ Código gerado! ${importedPlayers.length} jogadores. Total de Rebuys: ${totalRebuys}, Add-ons: ${totalAddons}, Arrecadação Real: R$ ${totalAmountReal}. Jogadores com add-on grátis: ${orgPlayers || 'nenhum'}`, "success");
+            showStatus(`✅ Código gerado! ${importedPlayers.length} jogadores. Rebuys: ${totalRebuys}, Add-ons: ${totalAddons}, Arrecadação: R$ ${totalAmountReal}. 🏆 Melhor Mão: ${bestHandPlayer ? bestHandPlayer.nickname : 'nenhum'} | Organização (add-ons grátis): ${organizacaoPlayers || 'nenhum'}`, "success");
         }
 
         function copyCode() {
